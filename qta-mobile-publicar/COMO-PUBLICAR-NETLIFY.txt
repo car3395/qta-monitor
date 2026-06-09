@@ -1,0 +1,24 @@
+QTA Mobile no Netlify
+
+Pasta que deve ser publicada:
+qta-mobile-publicar/public
+
+Arquivo principal:
+qta-mobile-publicar/public/index.html
+
+Importante:
+- Mudancas nos dados do Firebase NAO precisam de novo deploy.
+- O site le o Firebase diretamente quando abre no celular.
+- Novo deploy so e necessario quando mudar o codigo HTML/CSS/JS da pagina.
+
+Melhor fluxo:
+1. Subir esta pasta do projeto para um repositorio no GitHub.
+2. No Netlify, criar/importar site pelo GitHub.
+3. Usar estas configuracoes:
+   Build command: deixar vazio
+   Publish directory: qta-mobile-publicar/public
+4. Depois disso, quando o codigo for atualizado e enviado para o GitHub, o Netlify publica sozinho.
+
+Fluxo manual, se nao usar GitHub:
+Enviar a pasta qta-mobile-publicar/public no Netlify.
+

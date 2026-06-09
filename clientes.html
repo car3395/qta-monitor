@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Clientes Autorizados - QTA Monitor</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #101b2c;
+      --panel-2: #0c1727;
+      --line: #283d5d;
+      --text: #f0f6ff;
+      --muted: #9fb2cc;
+      --ok: #37d67a;
+      --bad: #ff5d5d;
+      --info: #4fd6e8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(79, 214, 232, 0.13), transparent 32%),
+        radial-gradient(circle at 88% 88%, rgba(55, 214, 122, 0.11), transparent 34%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(20, 29, 45, 0.96), rgba(11, 20, 34, 0.96));
+      border: 1px solid rgba(139, 158, 188, 0.22);
+      border-radius: 22px;
+      box-shadow: 0 22px 56px rgba(0, 0, 0, 0.35);
+    }
+
+    .wrap {
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 6vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 18px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      color: #c7d7ee;
+      font-weight: 900;
+    }
+
+    input {
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 1rem;
+      padding: 0 14px;
+    }
+
+    input:focus {
+      outline: 2px solid rgba(79, 214, 232, 0.38);
+      outline-offset: 1px;
+    }
+
+    button,
+    a.button {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #13243b;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 900;
+      padding: 0 14px;
+      text-decoration: none;
+    }
+
+    .primary {
+      border-color: rgba(79, 214, 232, 0.28);
+      background: linear-gradient(135deg, rgba(64, 113, 190, 0.86), rgba(20, 100, 77, 0.88));
+    }
+
+    .danger {
+      border-color: rgba(255, 93, 93, 0.35);
+      background: rgba(255, 93, 93, 0.14);
+      color: #ffcaca;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      width: fit-content;
+      min-height: 30px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 214, 122, 0.38);
+      background: rgba(55, 214, 122, 0.14);
+      color: #58e38c;
+      font-weight: 900;
+      padding: 6px 11px;
+    }
+
+    .pill.off {
+      border-color: rgba(255, 93, 93, 0.38);
+      background: rgba(255, 93, 93, 0.14);
+      color: #ff9b9b;
+    }
+
+    .client-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .client {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .client strong {
+      display: block;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .client small {
+      color: var(--muted);
+      word-break: break-word;
+    }
+
+    .msg {
+      display: none;
+      border-radius: 14px;
+      border: 1px solid rgba(79, 214, 232, 0.35);
+      background: rgba(79, 214, 232, 0.12);
+      color: #c7f6ff;
+      padding: 12px;
+      line-height: 1.35;
+    }
+
+    .msg.show {
+      display: block;
+    }
+
+    @media (max-width: 820px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .client {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="wrap">
+      <header>
+        <div>
+          <h1>Clientes autorizados</h1>
+          <p>Cadastre aqui os e-mails que podem abrir o supervisório QTA.</p>
+        </div>
+        <div class="actions">
+          <a class="button" href="index.html">Abrir painel</a>
+          <a class="button" href="desktop.html">Abrir desktop</a>
+        </div>
+      </header>
+
+      <section class="grid">
+        <div class="card">
+          <h2>Cadastrar cliente</h2>
+          <div class="form">
+            <label>
+              Nome do cliente
+              <input id="clienteNome" type="text" placeholder="Ex: Mercado Central" />
+            </label>
+            <label>
+              E-mail autorizado
+              <input id="clienteEmail" type="email" placeholder="cliente@email.com" />
+            </label>
+            <button class="primary" type="button" onclick="salvarCliente()">Salvar cliente</button>
+            <div class="msg" id="formMsg"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Lista de clientes</h2>
+          <div class="client-list" id="listaClientes">Carregando...</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAv68oKzDq6lUiinjd1JYyNUZWOI2ZHkMc",
+      authDomain: "qta-monitor.firebaseapp.com",
+      databaseURL: "https://qta-monitor-default-rtdb.firebaseio.com",
+      projectId: "qta-monitor",
+      storageBucket: "qta-monitor.firebasestorage.app",
+      messagingSenderId: "956862044456",
+      appId: "1:956862044456:web:e39c866528d88364d3181d",
+      measurementId: "G-XKRNG1MGH8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const FIREBASE_BASE_URL = "https://qta-monitor-default-rtdb.firebaseio.com";
+
+    carregarClientes();
+
+    async function salvarCliente() {
+      const nome = valor("clienteNome") || "Cliente autorizado";
+      const email = valor("clienteEmail").toLowerCase();
+      if (!email || !email.includes("@")) {
+        mostrar("formMsg", "Informe um e-mail válido.");
+        return;
+      }
+
+      const cliente = {
+        ativo: true,
+        email,
+        nome,
+        cadastrado_em: new Date().toISOString()
+      };
+
+      try {
+        await escreverFirebase(`clientes_autorizados/${chaveEmail(email)}`, cliente);
+        document.getElementById("clienteNome").value = "";
+        document.getElementById("clienteEmail").value = "";
+        mostrar("formMsg", "Cliente autorizado com sucesso.");
+        carregarClientes();
+      } catch (erro) {
+        mostrar("formMsg", "Não foi possível salvar. Confira as regras do Firebase.");
+      }
+    }
+
+    async function carregarClientes() {
+      const lista = document.getElementById("listaClientes");
+      lista.textContent = "Carregando...";
+
+      try {
+        const dados = await lerFirebase("clientes_autorizados");
+        const entradas = Object.entries(dados || {}).sort((a, b) => {
+          const nomeA = (a[1].nome || a[1].email || a[0]).toLowerCase();
+          const nomeB = (b[1].nome || b[1].email || b[0]).toLowerCase();
+          return nomeA.localeCompare(nomeB);
+        });
+
+        if (!entradas.length) {
+          lista.textContent = "Nenhum cliente autorizado cadastrado.";
+          return;
+        }
+
+        lista.innerHTML = "";
+        entradas.forEach(([chave, cliente]) => {
+          const item = document.createElement("div");
+          item.className = "client";
+          item.innerHTML = `
+            <div>
+              <strong>${escapar(cliente.nome || "Cliente autorizado")}</strong>
+              <small>${escapar(cliente.email || chave)}</small>
+            </div>
+            <div class="actions">
+              <span class="pill ${cliente.ativo ? "" : "off"}">${cliente.ativo ? "Ativo" : "Bloqueado"}</span>
+              <button type="button" onclick="alternarCliente('${chave}', ${cliente.ativo ? "false" : "true"})">${cliente.ativo ? "Bloquear" : "Ativar"}</button>
+              <button class="danger" type="button" onclick="removerCliente('${chave}')">Remover</button>
+            </div>
+          `;
+          lista.appendChild(item);
+        });
+      } catch (erro) {
+        lista.textContent = "Não foi possível carregar a lista.";
+      }
+    }
+
+    async function alternarCliente(chave, ativo) {
+      await escreverFirebase(`clientes_autorizados/${chave}/ativo`, ativo);
+      carregarClientes();
+    }
+
+    async function removerCliente(chave) {
+      if (!confirm("Remover este cliente autorizado?")) return;
+      await apagarFirebase(`clientes_autorizados/${chave}`);
+      carregarClientes();
+    }
+
+    async function lerFirebase(caminho) {
+      const resposta = await fetch(await urlFirebase(caminho), {
+        method: "GET",
+        mode: "cors",
+        cache: "no-store"
+      });
+      if (!resposta.ok) throw new Error("Falha na leitura.");
+      return resposta.json();
+    }
+
+    async function escreverFirebase(caminho, valor) {
+      const resposta = await fetch(await urlFirebase(caminho), {
+        method: "PUT",
+        mode: "cors",
+        cache: "no-store",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(valor)
+      });
+      if (!resposta.ok) throw new Error("Falha ao salvar.");
+    }
+
+    async function apagarFirebase(caminho) {
+      const resposta = await fetch(await urlFirebase(caminho), {
+        method: "DELETE",
+        mode: "cors",
+        cache: "no-store"
+      });
+      if (!resposta.ok) throw new Error("Falha ao remover.");
+    }
+
+    async function urlFirebase(caminho) {
+      const parametros = new URLSearchParams({
+        t: String(Date.now())
+      });
+      return `${FIREBASE_BASE_URL}/${caminho}.json?${parametros.toString()}`;
+    }
+
+    function chaveEmail(email) {
+      return String(email || "").trim().toLowerCase().replace(/[.#$\[\]\/]/g, "_");
+    }
+
+    function valor(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function mostrar(id, texto) {
+      const el = document.getElementById(id);
+      el.textContent = texto;
+      el.classList.add("show");
+    }
+
+    function escapar(texto) {
+      return String(texto || "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+  </script>
+</body>
+</html>

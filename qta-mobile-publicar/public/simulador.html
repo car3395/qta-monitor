@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador QTA</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #101b2c;
+      --panel-2: #0c1727;
+      --line: #283d5d;
+      --text: #f0f6ff;
+      --muted: #9fb2cc;
+      --green: #37d67a;
+      --red: #ff5d5d;
+      --yellow: #ffc84a;
+      --blue: #4f8cff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 22px;
+    }
+
+    .app {
+      width: min(980px, 100%);
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero,
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .hero {
+      border-color: rgba(255, 200, 74, 0.6);
+      background: linear-gradient(135deg, rgba(255, 200, 74, 0.14), var(--panel) 58%);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      color: #c1d3ec;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    p,
+    .muted {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .info-item {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+    }
+
+    .info-item strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 1px solid #3b5f92;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-weight: 900;
+      min-height: 48px;
+      padding: 12px 16px;
+      background: #1f3b66;
+    }
+
+    button.red {
+      background: #822323;
+      border-color: #c94b4b;
+    }
+
+    button.green {
+      background: #145c34;
+      border-color: #33a363;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .status {
+      background: #081423;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: #d8e7fb;
+      min-height: 52px;
+      padding: 13px;
+      white-space: pre-wrap;
+    }
+
+    .danger {
+      color: #ffb6b6;
+    }
+
+    @media (max-width: 820px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <h1>Simulador QTA</h1>
+      <p>Arquivo separado para testes de queda e retorno de energia. Use apenas durante demonstração, validação técnica ou manutenção.</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Controles de simulação</h2>
+        <p class="muted">Estes botões gravam no Firebase e alteram o estado visto no QTA Mobile e no supervisório desktop.</p>
+
+        <div class="actions">
+          <button class="red" id="btnQueda" onclick="simularQueda()">Simular queda de energia</button>
+          <button class="green" id="btnRetorno" onclick="simularRetorno()">Simular retorno da rede</button>
+          <button id="btnAtualizar" onclick="lerEstado()">Atualizar leitura</button>
+        </div>
+
+        <div class="info-list">
+          <div class="info-item">
+            <strong>Queda de energia</strong>
+            <span>Rede concessionária fica em falha / 0 V. Reserva assume com 220 V.</span>
+          </div>
+          <div class="info-item">
+            <strong>Retorno da rede</strong>
+            <span>Rede concessionária volta para 220 V. Reserva volta para espera / 0 V.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Leitura atual</h2>
+        <div class="status" id="statusAtual">Aguardando leitura...</div>
+        <div class="status danger" id="erroAcao" style="margin-top: 12px;"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const FIREBASE_BASE_URL = "https://qta-monitor-default-rtdb.firebaseio.com";
+
+    async function lerEstado() {
+      setText("erroAcao", "");
+      try {
+        const resposta = await fetch(`${FIREBASE_BASE_URL}/sistema.json?t=${Date.now()}`);
+        if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+        const sistema = await resposta.json();
+        setText("statusAtual", montarResumo(sistema));
+      } catch (erro) {
+        setText("erroAcao", "Erro ao ler Firebase: " + (erro?.message || erro));
+      }
+    }
+
+    function montarResumo(sistema) {
+      const rede = sistema?.rede || {};
+      const gerador = sistema?.gerador || {};
+      return [
+        `Fonte ativa: ${sistema?.fonte_ativa || "--"}`,
+        `Estado: ${sistema?.estado || "--"}`,
+        `Alarme: ${sistema?.alarme ? "Ativo" : "Normal"}`,
+        "",
+        `Rede: ${rede.status ? "Normal" : "Falha"} | ${rede.tensao ?? "--"} V | ${rede.fases_ativas ?? "--"} fases`,
+        `Reserva/gerador: ${gerador.status ? "Ligado" : "Em espera"} | ${gerador.tensao ?? "--"} V | ${gerador.fases_ativas ?? "--"} fases`,
+        "",
+        `Atualizado em: ${new Date().toLocaleString("pt-BR")}`
+      ].join("\n");
+    }
+
+    async function simularQueda() {
+      setText("erroAcao", "");
+      setBotoes(true);
+
+      try {
+        const sistemaAtualRes = await fetch(`${FIREBASE_BASE_URL}/sistema.json`);
+        const sistemaAtual = await sistemaAtualRes.json();
+
+        if (sistemaAtual?.falha_inicio) {
+          setText("erroAcao", "Já existe uma falha em andamento.");
+          return;
+        }
+
+        const agora = Date.now();
+        await fetch(`${FIREBASE_BASE_URL}/sistema.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modo: "gerador",
+            estado: "REDE_FALHA_RESERVA_ATIVA",
+            alarme: true,
+            fonte_ativa: "GERADOR",
+            rede_status: false,
+            gerador_status: true,
+            tensao: 0,
+            falha_inicio: agora,
+            rede: {
+              status: false,
+              tensao: 0,
+              fases_ativas: 0,
+              sequencia_fase_ok: false
+            },
+            gerador: {
+              status: true,
+              tensao: 220,
+              fases_ativas: 3,
+              sequencia_fase_ok: true
+            }
+          })
+        });
+
+        const res = await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`);
+        const atual = await res.json();
+
+        await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            quedas_energia: (atual?.quedas_energia ?? 0) + 1,
+            acionamentos_gerador: (atual?.acionamentos_gerador ?? 0) + 1
+          })
+        });
+
+        await registrarEvento("queda_rede", "gerador");
+        await lerEstado();
+      } catch (erro) {
+        setText("erroAcao", "Erro ao simular queda: " + (erro?.message || erro));
+      } finally {
+        setBotoes(false);
+      }
+    }
+
+    async function simularRetorno() {
+      setText("erroAcao", "");
+      setBotoes(true);
+
+      try {
+        const sistemaRes = await fetch(`${FIREBASE_BASE_URL}/sistema.json`);
+        const sistemaAtual = await sistemaRes.json();
+        const falhaInicio = sistemaAtual?.falha_inicio ?? null;
+        const duracaoFalhaSegundos = falhaInicio ? Math.floor((Date.now() - falhaInicio) / 1000) : 0;
+
+        const estatRes = await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`);
+        const estatAtual = await estatRes.json();
+
+        await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tempo_total_sem_rede: (estatAtual?.tempo_total_sem_rede ?? 0) + duracaoFalhaSegundos
+          })
+        });
+
+        await fetch(`${FIREBASE_BASE_URL}/sistema.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modo: "rede",
+            estado: "REDE_NORMAL",
+            alarme: false,
+            fonte_ativa: "REDE",
+            rede_status: true,
+            gerador_status: false,
+            tensao: 220,
+            falha_inicio: null,
+            rede: {
+              status: true,
+              tensao: 220,
+              fases_ativas: 3,
+              sequencia_fase_ok: true
+            },
+            gerador: {
+              status: false,
+              tensao: 0,
+              fases_ativas: 0,
+              sequencia_fase_ok: false
+            }
+          })
+        });
+
+        await registrarEvento("retorno_rede", "rede");
+        await lerEstado();
+      } catch (erro) {
+        setText("erroAcao", "Erro ao simular retorno: " + (erro?.message || erro));
+      } finally {
+        setBotoes(false);
+      }
+    }
+
+    async function registrarEvento(tipo, modo) {
+      await fetch(`${FIREBASE_BASE_URL}/eventos.json`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipo,
+          modo,
+          timestamp: new Date().toLocaleString("pt-BR")
+        })
+      });
+    }
+
+    function setBotoes(disabled) {
+      ["btnQueda", "btnRetorno", "btnAtualizar"].forEach((id) => {
+        const botao = document.getElementById(id);
+        if (botao) botao.disabled = disabled;
+      });
+    }
+
+    function setText(id, valor) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = valor;
+    }
+
+    lerEstado();
+  </script>
+</body>
+</html>

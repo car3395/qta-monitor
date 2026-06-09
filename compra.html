@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Contratar QTA Monitor</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #101b2c;
+      --panel-2: #0c1727;
+      --line: #283d5d;
+      --text: #f0f6ff;
+      --muted: #9fb2cc;
+      --ok: #37d67a;
+      --info: #4fd6e8;
+      --warn: #ffc84a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(79, 214, 232, 0.13), transparent 34%),
+        radial-gradient(circle at 80% 78%, rgba(55, 214, 122, 0.12), transparent 34%),
+        linear-gradient(180deg, #080d17 0%, #07111f 48%, #061018 100%);
+      color: var(--text);
+    }
+
+    .page {
+      width: min(100%, 980px);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .hero,
+    .details {
+      background: linear-gradient(180deg, rgba(20, 29, 45, 0.96), rgba(11, 20, 34, 0.96));
+      border: 1px solid rgba(139, 158, 188, 0.22);
+      border-radius: 28px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .hero {
+      display: grid;
+      gap: 20px;
+      padding: 32px;
+    }
+
+    .details {
+      display: grid;
+      gap: 14px;
+      padding: 24px;
+    }
+
+    .pill {
+      width: fit-content;
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(55, 214, 122, 0.38);
+      border-radius: 999px;
+      background: rgba(55, 214, 122, 0.14);
+      color: #58e38c;
+      font-weight: 900;
+      padding: 7px 13px;
+    }
+
+    h1 {
+      max-width: 700px;
+      font-size: clamp(2.35rem, 8vw, 4.8rem);
+      line-height: 0.96;
+      letter-spacing: 0;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    .email-box {
+      color: #dceaff;
+      background: rgba(12, 23, 39, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      word-break: break-word;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    a,
+    button {
+      min-height: 54px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 900;
+      text-decoration: none;
+      padding: 0 16px;
+    }
+
+    .primary {
+      border-color: rgba(79, 214, 232, 0.28);
+      background: linear-gradient(135deg, rgba(64, 113, 190, 0.86), rgba(20, 100, 77, 0.88));
+    }
+
+    .secondary {
+      background: rgba(18, 27, 43, 0.86);
+    }
+
+    .item {
+      display: grid;
+      gap: 5px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel-2);
+      padding: 14px;
+    }
+
+    .item strong {
+      color: #f7fbff;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        align-items: start;
+      }
+
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .hero,
+      .details {
+        border-radius: 24px;
+        padding: 22px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="pill">QTA Monitor</span>
+      <div>
+        <h1>Produto ainda não liberado</h1>
+        <p>Este e-mail entrou corretamente, mas ainda não está cadastrado como cliente autorizado do supervisório.</p>
+      </div>
+      <div class="email-box">
+        E-mail usado: <strong id="emailCliente">não informado</strong>
+      </div>
+      <div class="actions">
+        <a class="primary" id="whatsappLink" href="#" target="_blank" rel="noopener">Falar com suporte</a>
+        <a class="secondary" id="voltarLogin" href="index.html">Voltar ao login</a>
+      </div>
+    </section>
+
+    <section class="details">
+      <div class="item">
+        <strong>Como liberar o acesso</strong>
+        <p>A empresa cadastra o e-mail do cliente no Firebase e o painel passa a abrir normalmente.</p>
+      </div>
+      <div class="item">
+        <strong>Ideal para clientes reais</strong>
+        <p>O login por Google ou e-mail identifica quem está tentando acessar e separa cliente autorizado de visitante.</p>
+      </div>
+      <div class="item">
+        <strong>Contato rápido</strong>
+        <p>O botão de suporte já envia o e-mail usado no login para facilitar o cadastro.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const WHATSAPP_SUPORTE = "5531992646421";
+    const parametros = new URLSearchParams(window.location.search);
+    const email = parametros.get("email") || "";
+    const origem = parametros.get("origem") || "";
+    const veioDoDesktop = origem === "desktop" || window.matchMedia("(min-width: 900px)").matches;
+    const linkLogin = veioDoDesktop ? "desktop.html" : "index.html";
+    const emailTexto = email || "não informado";
+    const mensagem = [
+      "Olá, gostaria de liberar meu acesso ao QTA Monitor.",
+      `E-mail usado no login: ${emailTexto}`
+    ].join("\n");
+
+    document.getElementById("emailCliente").textContent = emailTexto;
+    document.getElementById("whatsappLink").href = `https://wa.me/${WHATSAPP_SUPORTE}?text=${encodeURIComponent(mensagem)}`;
+    document.getElementById("voltarLogin").href = linkLogin;
+  </script>
+</body>
+</html>

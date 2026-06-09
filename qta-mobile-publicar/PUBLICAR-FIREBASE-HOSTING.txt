@@ -1,0 +1,56 @@
+Publicar QTA Mobile no Firebase Hosting
+
+Pasta pronta para publicar:
+C:\Users\Pichau\Documents\Codex\2026-05-12\files-mentioned-by-the-user-supervisiorio\qta-mobile-publicar
+
+Projeto Firebase configurado:
+qta-monitor
+
+Arquivo principal do site:
+public\index.html
+
+URLs depois de publicar:
+Mobile principal:
+https://qta-monitor.web.app
+
+Mobile direto:
+https://qta-monitor.web.app/mobile
+
+Desktop:
+https://qta-monitor.web.app/desktop
+
+Desktop alternativo:
+https://qta-monitor.web.app/supervisorio
+
+Simulador de queda/retorno:
+https://qta-monitor.web.app/simulador
+
+Primeira vez no computador:
+1. Instale o Node.js, se ainda nao tiver:
+   https://nodejs.org
+
+2. Instale a ferramenta do Firebase:
+   npm install -g firebase-tools
+
+3. Entre na sua conta Firebase:
+   firebase login
+
+4. Entre nesta pasta:
+   cd "C:\Users\Pichau\Documents\Codex\2026-05-12\files-mentioned-by-the-user-supervisiorio\qta-mobile-publicar"
+
+5. Publique:
+   firebase deploy --only hosting
+
+Depois da primeira publicacao:
+- Se mudar apenas dados no Firebase, nao precisa publicar de novo.
+- Se mudar o codigo da pagina, rode novamente:
+  firebase deploy --only hosting
+
+Link esperado apos publicar:
+https://qta-monitor.web.app
+
+Observacao:
+Se o Firebase pedir para escolher o projeto, selecione qta-monitor.
+
+
+

@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>QTA Mobile</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --surface: #101b2c;
+      --surface-2: #0c1727;
+      --surface-3: #15243a;
+      --line: #283d5d;
+      --text: #f0f6ff;
+      --muted: #9fb2cc;
+      --ok: #37d67a;
+      --warn: #ffc84a;
+      --bad: #ff5d5d;
+      --info: #4fd6e8;
+      --shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body:not(.logado) .app {
+      display: none;
+    }
+
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(79, 214, 232, 0.12), transparent 34%),
+        radial-gradient(circle at 80% 78%, rgba(55, 214, 122, 0.12), transparent 34%),
+        linear-gradient(180deg, #080d17 0%, #07111f 48%, #061018 100%),
+        var(--bg);
+    }
+
+    body.logado .login-screen {
+      display: none;
+    }
+
+    .login-card {
+      width: min(100%, 430px);
+      display: grid;
+      gap: 18px;
+      background: linear-gradient(180deg, rgba(20, 29, 45, 0.96), rgba(11, 20, 34, 0.96));
+      border: 1px solid rgba(139, 158, 188, 0.22);
+      border-radius: 28px;
+      padding: 26px 22px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .login-card h1 {
+      font-size: clamp(2rem, 10vw, 3.05rem);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .login-card p {
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.5;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .login-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .login-field label {
+      color: #b8c7dd;
+      font-weight: 900;
+      font-size: 0.95rem;
+    }
+
+    .login-form input {
+      width: 100%;
+      min-height: 58px;
+      border: 1px solid rgba(139, 158, 188, 0.22);
+      border-radius: 18px;
+      background: rgba(18, 27, 43, 0.86);
+      color: var(--text);
+      font-size: 1.08rem;
+      padding: 0 18px;
+    }
+
+    .login-form input::placeholder {
+      color: #707f96;
+    }
+
+    .login-form input:focus {
+      outline: 2px solid rgba(79, 214, 232, 0.4);
+      outline-offset: 1px;
+    }
+
+    .login-actions {
+      display: grid;
+      gap: 10px;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      min-height: 64px;
+      border: 1px solid rgba(139, 158, 188, 0.2);
+      border-radius: 22px;
+      padding: 8px;
+      background: rgba(13, 21, 34, 0.72);
+    }
+
+    .auth-tabs button {
+      min-height: 48px;
+      border: 0;
+      border-radius: 16px;
+      background: transparent;
+      color: #8f9db3;
+      font-weight: 900;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .login-panel {
+      display: none;
+      gap: 14px;
+    }
+
+    .login-panel.active {
+      display: grid;
+    }
+
+    .auth-tabs button.active {
+      color: #f0f6ff;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 8px 22px rgba(0, 0, 0, 0.24);
+    }
+
+    .auth-tabs .google-mark {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      vertical-align: -4px;
+    }
+
+    .login-primary,
+    .logout-btn {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #dce9ff;
+      color: #07111f;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .login-primary {
+      min-height: 58px;
+      border-radius: 18px;
+      border-color: rgba(79, 214, 232, 0.28);
+      color: #f6fbff;
+      background: linear-gradient(135deg, rgba(64, 113, 190, 0.86), rgba(20, 100, 77, 0.88));
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+      font-size: 1.06rem;
+    }
+
+    .login-link,
+    .create-link {
+      border: 0;
+      background: transparent;
+      color: #9fb2cc;
+      cursor: pointer;
+      font-weight: 800;
+      text-align: left;
+      padding: 0;
+    }
+
+    .create-link {
+      color: #8ee9ff;
+      font-size: 1rem;
+    }
+
+    .create-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      color: #8c9ab0;
+    }
+
+    .login-error {
+      display: none;
+      color: #ffcaca;
+      background: rgba(255, 93, 93, 0.14);
+      border: 1px solid rgba(255, 93, 93, 0.35);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding-bottom: 82px;
+    }
+
+    .appbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(7, 17, 31, 0.94);
+      border-bottom: 1px solid rgba(40, 61, 93, 0.9);
+      padding: 12px 14px;
+      backdrop-filter: blur(14px);
+    }
+
+    .appbar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand h1 {
+      font-size: 1.12rem;
+      line-height: 1.15;
+      margin-bottom: 3px;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.3;
+    }
+
+    .icon-btn {
+      min-width: 44px;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 900;
+    }
+
+    .appbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .logout-btn {
+      min-width: 58px;
+      width: auto;
+      padding: 0 12px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.82rem;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 8px;
+      margin: 12px -14px 0;
+      overflow-x: auto;
+      padding: 0 14px 2px;
+      scrollbar-width: none;
+    }
+
+    .top-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 900;
+      padding: 0 14px;
+    }
+
+    .tab-btn.active {
+      background: #dce9ff;
+      border-color: #dce9ff;
+      color: #07111f;
+    }
+
+    main {
+      display: grid;
+      gap: 12px;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    .screen {
+      display: none;
+      gap: 12px;
+    }
+
+    .screen.active {
+      display: grid;
+    }
+
+    .hero {
+      display: grid;
+      gap: 12px;
+      background: #102033;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero.ok {
+      border-color: rgba(55, 214, 122, 0.55);
+      background: linear-gradient(135deg, rgba(55, 214, 122, 0.16), #102033 62%);
+    }
+
+    .hero.warn {
+      border-color: rgba(255, 200, 74, 0.65);
+      background: linear-gradient(135deg, rgba(255, 200, 74, 0.18), #102033 62%);
+    }
+
+    .hero.bad {
+      border-color: rgba(255, 93, 93, 0.7);
+      background: linear-gradient(135deg, rgba(255, 93, 93, 0.18), #102033 62%);
+    }
+
+    .hero h2 {
+      font-size: 1.45rem;
+      line-height: 1.08;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.4;
+    }
+
+    .status-strip {
+      display: grid;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .card {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .card.ok-state {
+      border-color: rgba(55, 214, 122, 0.46);
+      background: linear-gradient(180deg, rgba(55, 214, 122, 0.12), var(--surface) 64%);
+    }
+
+    .card.warn-state {
+      border-color: rgba(255, 200, 74, 0.58);
+      background: linear-gradient(180deg, rgba(255, 200, 74, 0.14), var(--surface) 64%);
+    }
+
+    .card.bad-state {
+      border-color: rgba(255, 93, 93, 0.62);
+      background: linear-gradient(180deg, rgba(255, 93, 93, 0.15), var(--surface) 64%);
+    }
+
+    .card.neutral-state {
+      border-color: rgba(79, 214, 232, 0.32);
+      background: linear-gradient(180deg, rgba(79, 214, 232, 0.08), var(--surface) 68%);
+    }
+
+    .decision {
+      display: grid;
+      gap: 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .decision strong {
+      font-size: 1rem;
+    }
+
+    .decision.ok {
+      border-color: rgba(55, 214, 122, 0.45);
+    }
+
+    .decision.warn {
+      border-color: rgba(255, 200, 74, 0.55);
+    }
+
+    .decision.bad {
+      border-color: rgba(255, 93, 93, 0.62);
+    }
+
+    .mini-flow {
+      display: grid;
+      gap: 8px;
+    }
+
+    .flow-step {
+      align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      display: grid;
+      grid-template-columns: 30px 1fr auto;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .flow-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #50617a;
+      border: 2px solid #7f90aa;
+    }
+
+    .flow-step.ok .flow-dot {
+      background: var(--ok);
+      border-color: #a8f3c4;
+    }
+
+    .flow-step.warn .flow-dot {
+      background: var(--warn);
+      border-color: #ffe6a0;
+    }
+
+    .flow-step.bad .flow-dot {
+      background: var(--bad);
+      border-color: #ffb6b6;
+    }
+
+    .flow-step small {
+      color: var(--muted);
+      display: block;
+      font-size: 0.78rem;
+    }
+
+    .card h2 {
+      color: #b8c9e2;
+      font-size: 0.8rem;
+      letter-spacing: 0;
+      margin-bottom: 9px;
+      text-transform: uppercase;
+    }
+
+    .value {
+      font-size: 1.6rem;
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 8px;
+      word-break: break-word;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.38;
+    }
+
+    .pill {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 900;
+      min-height: 29px;
+      padding: 6px 10px;
+    }
+
+    .pill.ok {
+      color: var(--ok);
+      border-color: rgba(55, 214, 122, 0.45);
+      background: rgba(55, 214, 122, 0.12);
+    }
+
+    .pill.warn {
+      color: var(--warn);
+      border-color: rgba(255, 200, 74, 0.45);
+      background: rgba(255, 200, 74, 0.12);
+    }
+
+    .pill.bad {
+      color: var(--bad);
+      border-color: rgba(255, 93, 93, 0.45);
+      background: rgba(255, 93, 93, 0.12);
+    }
+
+    .lamps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .lampbox {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .lamp {
+      width: 25px;
+      height: 25px;
+      margin: 0 auto 8px;
+      border-radius: 50%;
+      background: #334155;
+    }
+
+    .lamp.on.green {
+      background: var(--ok);
+      box-shadow: 0 0 16px rgba(55, 214, 122, 0.75);
+    }
+
+    .lamp.on.yellow {
+      background: var(--warn);
+      box-shadow: 0 0 16px rgba(255, 200, 74, 0.75);
+    }
+
+    .lamp.on.red {
+      background: var(--bad);
+      box-shadow: 0 0 16px rgba(255, 93, 93, 0.75);
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(159, 178, 204, 0.14);
+      padding: 10px 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .row strong {
+      color: var(--text);
+      text-align: right;
+    }
+
+    .actions {
+      display: grid;
+      gap: 9px;
+    }
+
+    button {
+      min-height: 48px;
+      border: 1px solid #3b5f92;
+      border-radius: 12px;
+      background: #1f3b66;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 900;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .btn-danger {
+      background: #7d2020;
+      border-color: #bd4646;
+    }
+
+    .btn-success {
+      background: #145c34;
+      border-color: #33a363;
+    }
+
+    .events {
+      display: grid;
+      gap: 8px;
+    }
+
+    .event {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 12px;
+    }
+
+    pre {
+      max-height: 320px;
+      overflow: auto;
+      background: #050d19;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      color: #cfe0f7;
+      font-size: 0.76rem;
+      line-height: 1.42;
+      padding: 11px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .chart-wrap {
+      background: #050d19;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 10px;
+    }
+
+    .chart-wrap canvas {
+      display: block;
+      width: 100%;
+      height: 190px;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      align-items: center;
+      color: var(--muted);
+      display: inline-flex;
+      font-size: 0.78rem;
+      font-weight: 800;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      border-radius: 999px;
+      display: inline-block;
+      height: 8px;
+      width: 18px;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      background: rgba(7, 17, 31, 0.96);
+      border-top: 1px solid var(--line);
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      backdrop-filter: blur(14px);
+    }
+
+    .nav-item {
+      min-height: 50px;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 900;
+      line-height: 1.2;
+      padding: 6px 4px;
+    }
+
+    .nav-item span {
+      display: block;
+      font-size: 1rem;
+      margin-bottom: 2px;
+    }
+
+    .nav-item.active {
+      background: var(--surface);
+      border-color: var(--line);
+      color: var(--text);
+    }
+
+    @media (min-width: 740px) {
+      .app {
+        padding-bottom: 0;
+      }
+
+      .bottom-nav {
+        display: none;
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .wide {
+        grid-column: 1 / -1;
+      }
+
+      .actions {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <span class="pill ok">QTA Monitor</span>
+      <div>
+        <h1>Entre para monitorar</h1>
+        <p>Acompanhe rede, reserva, alarmes e histórico do sistema em tempo real.</p>
+      </div>
+
+      <div class="auth-tabs" aria-label="Método de entrada">
+        <button class="active" type="button" id="tabEmail" onclick="selecionarLogin('email')">✉ E-mail</button>
+        <button type="button" onclick="entrarComGoogle()">
+          <svg class="google-mark" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.29h6.47c-.28 1.5-1.13 2.77-2.41 3.62v2.95h3.9c2.29-2.1 3.53-5.2 3.53-8.59z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.94-2.9l-3.9-2.95c-1.08.72-2.46 1.15-4.04 1.15-3.11 0-5.75-2.1-6.7-4.93H1.28v3.04C3.25 21.3 7.28 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.3 14.37c-.24-.72-.38-1.49-.38-2.37s.14-1.65.38-2.37V6.59H1.28C.46 8.22 0 10.06 0 12s.46 3.78 1.28 5.41l4.02-3.04z"/>
+            <path fill="#EA4335" d="M12 4.7c1.76 0 3.35.61 4.59 1.8l3.45-3.45C17.95 1.11 15.24 0 12 0 7.28 0 3.25 2.7 1.28 6.59L5.3 9.63C6.25 6.8 8.89 4.7 12 4.7z"/>
+          </svg>
+          Google
+        </button>
+        <button type="button" id="tabCodigo" onclick="selecionarLogin('codigo')">Código</button>
+      </div>
+
+      <div class="login-panel active" id="painelLoginEmail">
+        <div class="login-form">
+          <div class="login-field">
+            <label for="loginEmail">E-mail</label>
+            <input id="loginEmail" type="email" autocomplete="email" placeholder="seu@email.com" />
+          </div>
+          <div class="login-field">
+            <label for="loginSenha">Senha</label>
+            <input id="loginSenha" type="password" autocomplete="current-password" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <button class="login-link" type="button" onclick="recuperarSenha()">Esqueci minha senha</button>
+        <button class="login-primary" type="button" onclick="entrarComEmail()">Entrar</button>
+
+        <div class="create-row">
+          <span>Novo por aqui?</span>
+          <button class="create-link" type="button" onclick="criarContaEmail()">Criar conta</button>
+        </div>
+      </div>
+
+      <div class="login-panel" id="painelLoginCodigo">
+        <div class="login-form">
+          <div class="login-field">
+            <label for="loginCodigoCliente">Código do cliente</label>
+            <input id="loginCodigoCliente" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Ex: 3395" />
+          </div>
+        </div>
+
+        <button class="login-primary" type="button" onclick="entrarComCodigo()">Entrar com código</button>
+        <p class="small">Use o código fornecido pela empresa responsável pelo QTA.</p>
+      </div>
+
+      <div class="login-error" id="loginErro"></div>
+    </div>
+  </section>
+
+  <div class="app">
+    <header class="appbar">
+      <div class="appbar-top">
+        <div class="brand">
+          <h1>QTA Mobile</h1>
+          <p>Supervisório online para rede, gerador e alarmes.</p>
+        </div>
+        <div class="appbar-actions">
+          <button class="icon-btn" id="btnAtualizar" onclick="carregarDados()" title="Atualizar">↻</button>
+          <button class="logout-btn" type="button" onclick="sair()">Sair</button>
+        </div>
+      </div>
+      <nav class="top-tabs" aria-label="Navegação principal">
+        <button class="tab-btn active" data-screen="painel">Painel</button>
+        <button class="tab-btn" data-screen="operacao">Operação</button>
+        <button class="tab-btn" data-screen="eventos">Eventos</button>
+        <button class="tab-btn" data-screen="suporte">Suporte</button>
+        <button class="tab-btn" data-screen="diagnosticoTela">Diagnóstico</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="screen active" id="painel">
+        <div class="hero" id="estadoGeralMobile">
+          <span class="pill warn" id="statusPill">Iniciando leitura</span>
+          <h2 id="modo">--</h2>
+          <p id="statusTexto">Preparando conexão com o Firebase...</p>
+          <div class="small">Atualizado em <strong id="ultimaAtualizacao">--</strong></div>
+        </div>
+
+        <div class="grid">
+          <div class="card" id="cardMobileTensao">
+            <h2>Tensão</h2>
+            <div class="value" id="tensao">-- V</div>
+            <span class="pill" id="tensaoTag">Aguardando</span>
+          </div>
+          <div class="card" id="cardMobileRede">
+            <h2>Rede</h2>
+            <div class="value" id="rede">--</div>
+            <span class="pill" id="redeTag">Aguardando</span>
+          </div>
+          <div class="card" id="cardMobileGerador">
+            <h2>Gerador</h2>
+            <div class="value" id="gerador">--</div>
+            <span class="pill" id="geradorTag">Aguardando</span>
+          </div>
+          <div class="card" id="cardMobileModo">
+            <h2>Modo</h2>
+            <div class="value" id="modoResumo">--</div>
+            <span class="pill" id="modoTag">Aguardando</span>
+          </div>
+        </div>
+
+        <div class="decision" id="decisaoCliente">
+          <span class="pill" id="decisaoTag">Aguardando</span>
+          <strong id="decisaoTitulo">Aguardando decisão</strong>
+          <div class="small" id="decisaoTexto">O painel vai informar se basta acompanhar ou se é melhor falar com o suporte.</div>
+        </div>
+
+        <div class="card">
+          <h2>Sinalização</h2>
+          <div class="lamps">
+            <div class="lampbox">
+              <div class="lamp green" id="lampRede"></div>
+              <strong>Rede</strong>
+              <div class="small" id="txtRede">--</div>
+            </div>
+            <div class="lampbox">
+              <div class="lamp yellow" id="lampGerador"></div>
+              <strong>Gerador</strong>
+              <div class="small" id="txtGerador">--</div>
+            </div>
+            <div class="lampbox">
+              <div class="lamp red" id="lampAlarme"></div>
+              <strong>Alarme</strong>
+              <div class="small" id="txtAlarme">--</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card wide">
+          <h2>Gráfico de tensão</h2>
+          <div class="chart-wrap">
+            <canvas id="graficoMobile" width="720" height="260"></canvas>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-dot" style="background:#4fd6e8"></span>Rede concessionária</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#ffc84a"></span>Reserva / gerador</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="operacao">
+        <div class="card">
+          <h2>O que está acontecendo</h2>
+          <div class="small" id="diagnostico">Aguardando leitura...</div>
+        </div>
+
+        <div class="card">
+          <h2>Sequência atual</h2>
+          <div class="mini-flow">
+            <div class="flow-step" id="flowRede">
+              <div class="flow-dot"></div>
+              <div><strong>Concessionária</strong><small>Entrada principal</small></div>
+              <span id="flowRedeTxt">--</span>
+            </div>
+            <div class="flow-step" id="flowReserva">
+              <div class="flow-dot"></div>
+              <div><strong>Reserva / gerador</strong><small>Alimentação alternativa</small></div>
+              <span id="flowReservaTxt">--</span>
+            </div>
+            <div class="flow-step" id="flowAcao">
+              <div class="flow-dot"></div>
+              <div><strong>Ação recomendada</strong><small>Para cliente e suporte</small></div>
+              <span id="flowAcaoTxt">--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Estatísticas</h2>
+          <div class="row"><span>Quedas de energia</span><strong id="quedas">0</strong></div>
+          <div class="row"><span>Tempo total sem rede</span><strong id="tempoSemRede">0 s</strong></div>
+          <div class="row"><span>Acionamentos do gerador</span><strong id="acionamentos">0</strong></div>
+          <div class="row"><span>Falha atual</span><strong id="falhaAtual">0 s</strong></div>
+        </div>
+
+        <div class="card">
+          <h2>Controle de leitura</h2>
+          <div class="actions">
+            <button onclick="carregarDados()">Atualizar dados</button>
+          </div>
+          <p class="small">No mobile, o supervisório apenas acompanha os dados em tempo real.</p>
+        </div>
+      </section>
+
+      <section class="screen" id="eventos">
+        <div class="card">
+          <h2>Eventos recentes</h2>
+          <div class="events" id="eventosLista">Sem eventos carregados.</div>
+        </div>
+      </section>
+
+      <section class="screen" id="suporte">
+        <div class="hero">
+          <span class="pill ok">Suporte técnico</span>
+          <h2>Falar com suporte</h2>
+          <p>Envie o estado atual do QTA para a equipe técnica pelo WhatsApp.</p>
+        </div>
+
+        <div class="card">
+          <h2>Contato</h2>
+          <div class="row"><span>WhatsApp</span><strong>(31) 99264-6421</strong></div>
+          <div class="actions">
+            <button class="btn-success" onclick="abrirWhatsAppSuporte()">Enviar diagnóstico</button>
+            <button onclick="copiarDiagnosticoSuporte()">Copiar diagnóstico</button>
+          </div>
+          <p class="small" id="statusSuporte">A mensagem será montada com a última leitura recebida do Firebase.</p>
+        </div>
+
+        <div class="card">
+          <h2>Prévia da mensagem</h2>
+          <pre id="mensagemSuporte">Aguardando dados...</pre>
+        </div>
+      </section>
+
+      <section class="screen" id="diagnosticoTela">
+        <div class="status-strip">
+          <div class="small">Método usado: <strong id="metodoLeitura">--</strong></div>
+          <div class="small">Estado da conexão: <strong id="estadoConexaoTexto">Aguardando</strong></div>
+        </div>
+        <div class="card">
+          <h2>Resumo dos dados</h2>
+          <pre id="debug">Aguardando dados...</pre>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navegação inferior">
+      <button class="nav-item active" data-screen="painel"><span>⌂</span>Painel</button>
+      <button class="nav-item" data-screen="operacao"><span>▣</span>Operação</button>
+      <button class="nav-item" data-screen="eventos"><span>≡</span>Eventos</button>
+      <button class="nav-item" data-screen="suporte"><span>☎</span>Suporte</button>
+      <button class="nav-item" data-screen="diagnosticoTela"><span>i</span>Dados</button>
+    </nav>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAv68oKzDq6lUiinjd1JYyNUZWOI2ZHkMc",
+      authDomain: "qta-monitor.firebaseapp.com",
+      databaseURL: "https://qta-monitor-default-rtdb.firebaseio.com",
+      projectId: "qta-monitor",
+      storageBucket: "qta-monitor.firebasestorage.app",
+      messagingSenderId: "956862044456",
+      appId: "1:956862044456:web:e39c866528d88364d3181d",
+      measurementId: "G-XKRNG1MGH8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+    const FIREBASE_BASE_URL = "https://qta-monitor-default-rtdb.firebaseio.com";
+    const WHATSAPP_SUPORTE = "5531992646421";
+    const historicoRede = [];
+    const historicoGerador = [];
+    const maxPontosGrafico = 24;
+    let carregando = false;
+    let intervaloLeitura = null;
+    let codigoClienteAtual = localStorage.getItem("qtaClienteCodigo") || "";
+    let dadosClienteCodigo = null;
+    let mensagemSuporteAtual = "Aguardando dados do Firebase.";
+
+    document.querySelectorAll("[data-screen]").forEach((botao) => {
+      botao.addEventListener("click", () => trocarTela(botao.dataset.screen));
+    });
+
+    auth.onAuthStateChanged(async (usuario) => {
+      if (codigoClienteAtual) {
+        document.body.classList.add("logado");
+        esconderErroLogin();
+        iniciarLeitura();
+        return;
+      }
+
+      if (usuario) {
+        const autorizado = await validarClientePorEmail(usuario);
+        if (autorizado) {
+          document.body.classList.add("logado");
+          esconderErroLogin();
+          iniciarLeitura();
+        } else {
+          abrirPaginaCompra(usuario.email);
+        }
+        return;
+      }
+
+      document.body.classList.remove("logado");
+      pararLeitura();
+      setStatus("warn", "Login necessário", "Entre para iniciar a leitura do Firebase.");
+    });
+
+    function selecionarLogin(modo) {
+      const emailAtivo = modo === "email";
+      document.getElementById("painelLoginEmail").classList.toggle("active", emailAtivo);
+      document.getElementById("painelLoginCodigo").classList.toggle("active", !emailAtivo);
+      document.getElementById("tabEmail").classList.toggle("active", emailAtivo);
+      document.getElementById("tabCodigo").classList.toggle("active", !emailAtivo);
+      esconderErroLogin();
+    }
+
+    function iniciarLeitura() {
+      carregarDados();
+      if (!intervaloLeitura) intervaloLeitura = setInterval(carregarDados, 4000);
+    }
+
+    function pararLeitura() {
+      if (intervaloLeitura) clearInterval(intervaloLeitura);
+      intervaloLeitura = null;
+      carregando = false;
+    }
+
+    async function validarClientePorEmail(usuario) {
+      const email = usuario && usuario.email ? usuario.email.trim().toLowerCase() : "";
+      if (!email) return false;
+      try {
+        const pacote = await lerFirebase(`clientes_autorizados/${chaveEmailCliente(email)}`);
+        const cliente = pacote.dados;
+        return Boolean(cliente && cliente.ativo === true);
+      } catch {
+        return false;
+      }
+    }
+
+    function chaveEmailCliente(email) {
+      return String(email || "").trim().toLowerCase().replace(/[.#$\[\]\/]/g, "_");
+    }
+
+    function abrirPaginaCompra(email) {
+      const destino = `compra.html?origem=mobile&email=${encodeURIComponent(email || "")}`;
+      auth.signOut().catch(() => {});
+      window.location.href = destino;
+    }
+
+    async function entrarComGoogle() {
+      limparCodigoCliente();
+      esconderErroLogin();
+      try {
+        await auth.signInWithPopup(googleProvider);
+      } catch (erro) {
+        if (erro.code === "auth/popup-blocked" || erro.code === "auth/cancelled-popup-request") {
+          await auth.signInWithRedirect(googleProvider);
+          return;
+        }
+        mostrarErroLogin(traduzirErroAuth(erro));
+      }
+    }
+
+    async function entrarComEmail() {
+      limparCodigoCliente();
+      esconderErroLogin();
+      const email = pegarValor("loginEmail");
+      const senha = pegarValor("loginSenha");
+      if (!email || !senha) {
+        mostrarErroLogin("Informe e-mail e senha para entrar.");
+        return;
+      }
+      try {
+        await auth.signInWithEmailAndPassword(email, senha);
+      } catch (erro) {
+        mostrarErroLogin(traduzirErroAuth(erro));
+      }
+    }
+
+    async function criarContaEmail() {
+      limparCodigoCliente();
+      esconderErroLogin();
+      const email = pegarValor("loginEmail");
+      const senha = pegarValor("loginSenha");
+      if (!email || !senha) {
+        mostrarErroLogin("Informe e-mail e senha para criar o acesso.");
+        return;
+      }
+      try {
+        await auth.createUserWithEmailAndPassword(email, senha);
+      } catch (erro) {
+        mostrarErroLogin(traduzirErroAuth(erro));
+      }
+    }
+
+    async function recuperarSenha() {
+      esconderErroLogin();
+      const email = pegarValor("loginEmail");
+      if (!email) {
+        mostrarErroLogin("Digite seu e-mail para receber o link de recuperação.");
+        return;
+      }
+      try {
+        await auth.sendPasswordResetEmail(email);
+        mostrarErroLogin("Enviamos um link de recuperação para esse e-mail.");
+      } catch (erro) {
+        mostrarErroLogin(traduzirErroAuth(erro));
+      }
+    }
+
+    async function entrarComCodigo() {
+      esconderErroLogin();
+      const codigo = formatarCodigoCliente(pegarValor("loginCodigoCliente"));
+      if (!codigo) {
+        mostrarErroLogin("Digite o código do cliente para entrar.");
+        return;
+      }
+      if (/[.#$\[\]\/]/.test(codigo)) {
+        mostrarErroLogin("Esse código tem um caractere inválido. Confira e tente novamente.");
+        return;
+      }
+
+      try {
+        const pacote = await lerFirebase(`clientes/${codigo}`);
+        const cliente = pacote.dados;
+        if (!cliente || cliente.ativo !== true) {
+          mostrarErroLogin("Código não encontrado ou acesso desativado.");
+          return;
+        }
+
+        if (auth.currentUser) await auth.signOut();
+        codigoClienteAtual = codigo;
+        dadosClienteCodigo = cliente;
+        localStorage.setItem("qtaClienteCodigo", codigo);
+        document.body.classList.add("logado");
+        iniciarLeitura();
+      } catch (erro) {
+        mostrarErroLogin("Não foi possível validar o código agora. Confira a internet e tente novamente.");
+      }
+    }
+
+    function sair() {
+      limparCodigoCliente();
+      pararLeitura();
+      document.body.classList.remove("logado");
+      setStatus("warn", "Login necessário", "Entre para iniciar a leitura do Firebase.");
+      if (auth.currentUser) auth.signOut();
+    }
+
+    function limparCodigoCliente() {
+      codigoClienteAtual = "";
+      dadosClienteCodigo = null;
+      localStorage.removeItem("qtaClienteCodigo");
+    }
+
+    function formatarCodigoCliente(valor) {
+      return String(valor || "").trim().toUpperCase().replace(/\s+/g, "-");
+    }
+
+    function pegarValor(id) {
+      const campo = document.getElementById(id);
+      return campo ? campo.value.trim() : "";
+    }
+
+    function mostrarErroLogin(texto) {
+      const erro = document.getElementById("loginErro");
+      if (!erro) return;
+      erro.textContent = texto;
+      erro.classList.add("show");
+    }
+
+    function esconderErroLogin() {
+      const erro = document.getElementById("loginErro");
+      if (!erro) return;
+      erro.textContent = "";
+      erro.classList.remove("show");
+    }
+
+    function traduzirErroAuth(erro) {
+      const codigo = erro && erro.code ? erro.code : "";
+      if (codigo.includes("invalid-email")) return "O e-mail informado não parece válido.";
+      if (codigo.includes("user-not-found") || codigo.includes("invalid-credential")) return "E-mail ou senha não conferem.";
+      if (codigo.includes("wrong-password")) return "Senha incorreta.";
+      if (codigo.includes("email-already-in-use")) return "Esse e-mail já tem acesso cadastrado. Use Entrar com e-mail.";
+      if (codigo.includes("weak-password")) return "Use uma senha com pelo menos 6 caracteres.";
+      if (codigo.includes("popup-closed-by-user")) return "A janela do Google foi fechada antes de concluir o login.";
+      if (codigo.includes("unauthorized-domain")) return "Este endereço ainda não foi liberado no Firebase Authentication.";
+      return "Não foi possível entrar agora. Confira os dados e tente novamente.";
+    }
+
+    function trocarTela(id) {
+      document.querySelectorAll(".screen").forEach((screen) => {
+        screen.classList.toggle("active", screen.id === id);
+      });
+      document.querySelectorAll("[data-screen]").forEach((botao) => {
+        botao.classList.toggle("active", botao.dataset.screen === id);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function carregarDados() {
+      if (carregando) return;
+      carregando = true;
+      setStatus("warn", "Lendo Firebase", "Tentando conexão com o Firebase...");
+
+      try {
+        if (navigator.onLine === false) throw new Error("Dispositivo sem internet.");
+
+        const pacote = await lerFirebase("");
+        const raiz = pacote.dados ?? {};
+        const sistema = normalizarSistema(raiz.sistema ?? raiz);
+        const estatisticas = normalizarEstatisticas(raiz.estatisticas);
+        const eventos = normalizarEventos(raiz.eventos);
+
+        atualizarTela(sistema, estatisticas, eventos, raiz, pacote.metodo);
+        setStatus("ok", "Firebase conectado", "Dados recebidos com sucesso.");
+      } catch (erroRaiz) {
+        try {
+          const sistemaPacote = await lerFirebase("sistema");
+          const estatPacote = await lerFirebase("estatisticas");
+          const eventosPacote = await lerFirebase("eventos");
+          const sistema = normalizarSistema(sistemaPacote.dados);
+          const estatisticas = normalizarEstatisticas(estatPacote.dados);
+          const eventos = normalizarEventos(eventosPacote.dados);
+
+          atualizarTela(sistema, estatisticas, eventos, {
+            sistema: sistemaPacote.dados,
+            estatisticas: estatPacote.dados,
+            eventos: eventosPacote.dados
+          }, `${sistemaPacote.metodo} por caminhos separados`);
+          setStatus("ok", "Firebase conectado", "Dados recebidos com sucesso.");
+        } catch (erroFinal) {
+          setStatus("bad", "Falha na leitura", explicarErro(erroFinal));
+          setText("debug", "Nao foi possivel receber os dados do Firebase.\n\nDetalhe: " + explicarErro(erroFinal));
+        }
+      } finally {
+        carregando = false;
+      }
+    }
+
+    async function lerFirebase(caminho) {
+      const clean = caminho ? "/" + caminho.replace(/^\/|\/$/g, "") : "";
+      const url = await montarUrlFirebase(clean);
+
+      try {
+        return { dados: await lerComFetch(url), metodo: "fetch" };
+      } catch (erroFetch) {
+        try {
+          return { dados: await lerComXhr(url), metodo: "XMLHttpRequest" };
+        } catch (erroXhr) {
+          return { dados: await lerComJsonp(url), metodo: "JSONP" };
+        }
+      }
+    }
+
+    async function montarUrlFirebase(caminhoLimpo) {
+      const usuario = auth.currentUser;
+      const parametros = new URLSearchParams({
+        t: String(Date.now())
+      });
+      if (usuario) parametros.set("auth", await usuario.getIdToken());
+      return `${FIREBASE_BASE_URL}${caminhoLimpo}.json?${parametros.toString()}`;
+    }
+
+    async function lerComFetch(url) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), 9000);
+
+      try {
+        const resposta = await fetch(url, {
+          method: "GET",
+          mode: "cors",
+          cache: "no-store",
+          headers: { "Accept": "application/json" },
+          signal: controller.signal
+        });
+
+        if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+        return resposta.json();
+      } finally {
+        clearTimeout(id);
+      }
+    }
+
+    function lerComXhr(url) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.timeout = 9000;
+        xhr.setRequestHeader("Accept", "application/json");
+        xhr.onload = () => {
+          if (xhr.status < 200 || xhr.status >= 300) {
+            reject(new Error(`HTTP ${xhr.status}`));
+            return;
+          }
+          try {
+            resolve(JSON.parse(xhr.responseText));
+          } catch {
+            reject(new Error("JSON inválido recebido do Firebase."));
+          }
+        };
+        xhr.onerror = () => reject(new Error("XHR bloqueado pelo navegador."));
+        xhr.ontimeout = () => reject(new Error("Tempo esgotado no XHR."));
+        xhr.send();
+      });
+    }
+
+    function lerComJsonp(url) {
+      return new Promise((resolve, reject) => {
+        const nome = "firebaseCallback_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+        const script = document.createElement("script");
+        const timeout = setTimeout(() => {
+          limpar();
+          reject(new Error("Tempo esgotado no JSONP."));
+        }, 9000);
+
+        function limpar() {
+          clearTimeout(timeout);
+          delete window[nome];
+          script.remove();
+        }
+
+        window[nome] = (dados) => {
+          limpar();
+          resolve(dados);
+        };
+
+        script.onerror = () => {
+          limpar();
+          reject(new Error("JSONP bloqueado pelo navegador."));
+        };
+
+        script.src = `${url}&callback=${nome}`;
+        document.head.appendChild(script);
+      });
+    }
+
+    function textoStatusDisponivel(valor) {
+      return valor ? "Disponivel / normal" : "Indisponivel / em falha";
+    }
+
+    function textoSequencia(valor) {
+      return valor ? "Sequencia correta" : "Falha ou nao confirmada";
+    }
+
+    function explicarEstadoCliente(estado) {
+      const mapa = {
+        REDE_NORMAL: "Rede da concessionaria normal",
+        REDE_FALHA_RESERVA_ATIVA: "Concessionaria em falha e reserva alimentando",
+        GERADOR_ATIVO: "Reserva / gerador alimentando",
+        ALARME: "Alarme ativo"
+      };
+      return mapa[estado] || estado || "Nao informado";
+    }
+
+    function montarResumoCliente(sistema, estatisticas, eventos, metodo) {
+      const totalEventos = eventos ? Object.keys(eventos).length : 0;
+      return [
+        "Resumo para o cliente",
+        "",
+        `Estado geral: ${explicarEstadoCliente(sistema?.estado)}`,
+        `Fonte alimentando agora: ${sistema?.fonte_ativa || "Nao informado"}`,
+        `Alarme: ${sistema?.alarme ? "Ativo" : "Sem alarme"}`,
+        `Tensao nominal configurada: ${sistema?.tensao_nominal ?? "--"} V`,
+        `Faixa estavel: ${textoFaixaTensao(sistema)}`,
+        `Faixa de transferencia: ${textoFaixaTensao(sistema, "falha")}`,
+        `Motivo atual da falha: ${explicarMotivoFalha(sistema?.motivo_falha_rede)}`,
+        "",
+        "Rede da concessionaria",
+        `Situacao: ${textoStatusDisponivel(sistema?.rede_status)}`,
+        `Tensao recebida: ${sistema?.rede_tensao ?? "--"} V`,
+        `Fases ativas: ${sistema?.rede_fases ?? "--"}`,
+        `Sequencia de fase: ${textoSequencia(sistema?.rede_sequencia_ok)}`,
+        "",
+        "Rede reserva / gerador",
+        `Situacao: ${sistema?.gerador_status ? "Em operacao" : "Em espera"}`,
+        `Tensao recebida: ${sistema?.gerador_tensao ?? "--"} V`,
+        `Fases ativas: ${sistema?.gerador_fases ?? "--"}`,
+        `Sequencia de fase: ${textoSequencia(sistema?.gerador_sequencia_ok)}`,
+        "",
+        "Historico",
+        `Quedas registradas: ${estatisticas?.quedas_energia ?? 0}`,
+        `Acionamentos da reserva: ${estatisticas?.acionamentos_gerador ?? 0}`,
+        `Eventos salvos: ${totalEventos}`,
+        `Forma de conexao: ${metodo || "Firebase"}`
+      ].join("\n");
+    }
+
+    function atualizarTela(sistema, estatisticas, eventos, bruto, metodo) {
+      const redeAtiva = sistema.rede_status;
+      const geradorLigado = sistema.gerador_status;
+      const alarmeAtivo = sistema.alarme;
+      const tensao = sistema.rede_tensao;
+      const redeTensaoOk = tensaoDentroDaFaixa(sistema.rede_tensao, sistema, "retorno");
+      const modo = sistema.modo;
+      const falhaAtual = !redeAtiva && sistema.falha_inicio ? Math.max(0, Math.floor((Date.now() - sistema.falha_inicio) / 1000)) : 0;
+      const estadoCliente = obterEstadoCliente(sistema);
+
+      atualizarEstadoGeralMobile(estadoCliente);
+      setText("modo", estadoCliente.titulo);
+      setText("modoResumo", sistema.fonte_ativa === "GERADOR" ? "RESERVA" : "REDE");
+      setText("tensao", `${sistema.rede_tensao} V`);
+      setText("rede", redeAtiva ? "NORMAL" : "FALHA");
+      setText("gerador", sistema.gerador_tensao > 0 ? `${sistema.gerador_tensao} V` : (geradorLigado ? "LIGADO" : "DESLIGADO"));
+      setText("txtRede", redeAtiva ? "ATIVA" : "FALHA");
+      setText("txtGerador", geradorLigado ? "LIGADO" : "DESLIGADO");
+      setText("txtAlarme", alarmeAtivo ? "ATIVO" : "NORMAL");
+      setText("quedas", estatisticas.quedas_energia);
+      setText("tempoSemRede", formatarTempo(estatisticas.tempo_total_sem_rede));
+      setText("acionamentos", estatisticas.acionamentos_gerador);
+      setText("falhaAtual", formatarTempo(falhaAtual));
+      setText("ultimaAtualizacao", new Date().toLocaleString("pt-BR"));
+      setText("metodoLeitura", metodo);
+      setText("debug", montarResumoCliente(sistema, estatisticas, eventos, metodo));
+
+      setCardState("cardMobileTensao", redeTensaoOk ? "ok" : "bad");
+      setCardState("cardMobileRede", redeAtiva ? "ok" : "bad");
+      setCardState("cardMobileGerador", geradorLigado ? "warn" : "neutral");
+      setCardState("cardMobileModo", estadoCliente.classe);
+      atualizarDecisaoCliente(estadoCliente);
+      atualizarFluxoMobile(sistema, estadoCliente);
+      atualizarGraficoMobile(sistema.rede_tensao, sistema.gerador_tensao, sistema);
+
+      setLamp("lampRede", redeAtiva);
+      setLamp("lampGerador", geradorLigado);
+      setLamp("lampAlarme", alarmeAtivo);
+      setPill("modoTag", modo === "rede" ? "ok" : "warn", modo === "rede" ? "Modo rede" : "Modo emergência");
+      setPill("tensaoTag", redeTensaoOk ? "ok" : "bad", redeTensaoOk ? `Nominal ${sistema.tensao_nominal} V | OK` : `Fora da faixa ${textoFaixaTensao(sistema)}`);
+      setPill("redeTag", redeAtiva ? "ok" : "bad", redeAtiva ? `${sistema.rede_fases} fases ativas` : "Sem rede");
+      setPill("geradorTag", geradorLigado ? "warn" : "", geradorLigado ? `Alimentando | ${sistema.gerador_fases} fases` : (sistema.gerador_tensao > 0 ? `Disponível | ${sistema.gerador_fases} fases` : "Em espera"));
+
+      if (!redeAtiva && geradorLigado) {
+        setText("diagnostico", "A concessionária está em falha, mas a rede reserva/gerador está alimentando a carga. A empresa só precisa agir se a reserva apresentar problema.");
+      } else if (redeAtiva && !geradorLigado) {
+        setText("diagnostico", `A rede da concessionária está normal, com ${sistema.rede_fases} fases ativas. A rede reserva permanece em espera.`);
+      } else {
+        setText("diagnostico", `Condição fora do padrão: ${sistema.estado}. Verifique rede, reserva, fases e sequência de fase.`);
+      }
+
+      atualizarMensagemSuporte(sistema, estatisticas, falhaAtual, metodo);
+      desenharEventos(eventos);
+    }
+
+    function obterEstadoCliente(sistema) {
+      const redeOk = sistema.rede_status && tensaoDentroDaFaixa(sistema.rede_tensao, sistema, "retorno");
+      const reservaOk = sistema.gerador_status && tensaoDentroDaFaixa(sistema.gerador_tensao, sistema, "retorno");
+
+      if (redeOk && !sistema.gerador_status && !sistema.alarme) {
+        return {
+          classe: "ok",
+          titulo: "Operação normal",
+          etiqueta: "Tudo normal",
+          texto: "Rede da concessionária alimentando. Reserva em espera."
+        };
+      }
+
+      if (!redeOk && reservaOk) {
+        return {
+          classe: "warn",
+          titulo: "Reserva ativa",
+          etiqueta: "Acompanhando",
+          texto: "Concessionária em falha, mas a reserva/gerador está alimentando."
+        };
+      }
+
+      if (!redeOk && !reservaOk) {
+        return {
+          classe: "bad",
+          titulo: "Precisa de suporte",
+          etiqueta: "Ação necessária",
+          texto: "Sem energia da concessionária e sem confirmação da reserva."
+        };
+      }
+
+      return {
+        classe: sistema.alarme ? "bad" : "warn",
+        titulo: sistema.alarme ? "Alarme ativo" : "Atenção no sistema",
+        etiqueta: "Verificar",
+        texto: "Confira os detalhes técnicos antes de considerar normal."
+      };
+    }
+
+    function atualizarEstadoGeralMobile(estado) {
+      const hero = document.getElementById("estadoGeralMobile");
+      if (hero) hero.className = `hero ${estado.classe}`;
+      setText("statusTexto", estado.texto);
+      setPill("statusPill", estado.classe === "bad" ? "bad" : estado.classe === "warn" ? "warn" : "ok", estado.etiqueta);
+    }
+
+    function atualizarDecisaoCliente(estado) {
+      const card = document.getElementById("decisaoCliente");
+      if (card) card.className = `decision ${estado.classe}`;
+      const titulo = estado.classe === "bad" ? "Falar com suporte" : estado.classe === "warn" ? "Acompanhar operação" : "Sem ação necessária";
+      const texto = estado.classe === "bad"
+        ? "Há sinal de problema na reserva/gerador ou falta de fonte confirmada. Use o botão de suporte com o diagnóstico automático."
+        : estado.classe === "warn"
+          ? "A concessionária pode estar em falha, mas a reserva está segurando. Acompanhe e só acione suporte se a reserva falhar."
+          : "Sistema em condição normal. Basta manter o acompanhamento periódico.";
+      setText("decisaoTitulo", titulo);
+      setText("decisaoTexto", texto);
+      setPill("decisaoTag", estado.classe === "bad" ? "bad" : estado.classe === "warn" ? "warn" : "ok", estado.etiqueta);
+    }
+
+    function atualizarFluxoMobile(sistema, estado) {
+      const redeOk = sistema.rede_status && tensaoDentroDaFaixa(sistema.rede_tensao, sistema, "retorno");
+      const reservaOk = sistema.gerador_status && tensaoDentroDaFaixa(sistema.gerador_tensao, sistema, "retorno");
+      setFlow("flowRede", "flowRedeTxt", redeOk ? "Normal" : "Falha", redeOk ? "ok" : "bad");
+      setFlow("flowReserva", "flowReservaTxt", reservaOk ? "Alimentando" : "Espera", reservaOk ? "warn" : "");
+      setFlow("flowAcao", "flowAcaoTxt", estado.classe === "bad" ? "Suporte" : estado.classe === "warn" ? "Acompanhar" : "Normal", estado.classe);
+    }
+
+    function atualizarMensagemSuporte(sistema, estatisticas, falhaAtual, metodo) {
+      const problemaReserva = !sistema.rede_status && (!sistema.gerador_status || !tensaoDentroDaFaixa(sistema.gerador_tensao, sistema, "retorno"));
+      const classificacao = problemaReserva
+        ? "Possível problema na rede reserva/gerador. Solicito verificação técnica."
+        : "Falha da concessionária com reserva normal, ou operação normal. A empresa atua apenas se houver problema na rede reserva.";
+
+      mensagemSuporteAtual = [
+        "Olá, preciso de suporte no sistema QTA.",
+        "",
+        `Classificação: ${classificacao}`,
+        "",
+        "Status atual:",
+        `Fonte ativa: ${sistema.fonte_ativa}`,
+        `Rede concessionária: ${sistema.rede_status ? "ATIVA" : "FALHA"}`,
+        `Rede reserva/gerador: ${sistema.gerador_status ? "EM OPERAÇÃO" : "NÃO OPERANDO"}`,
+        `Alarme: ${sistema.alarme ? "ATIVO" : "NORMAL"}`,
+        `Tensão nominal: ${sistema.tensao_nominal} V`,
+        `Faixa estável: ${textoFaixaTensao(sistema)}`,
+        `Motivo da falha: ${explicarMotivoFalha(sistema.motivo_falha_rede)}`,
+        `Tensão da rede: ${sistema.rede_tensao} V`,
+        `Tensão da reserva/gerador: ${sistema.gerador_tensao} V`,
+        `Falha atual: ${formatarTempo(falhaAtual)}`,
+        "",
+        "Estatísticas:",
+        `Quedas de energia: ${estatisticas.quedas_energia}`,
+        `Tempo total sem rede: ${formatarTempo(estatisticas.tempo_total_sem_rede)}`,
+        `Acionamentos do gerador: ${estatisticas.acionamentos_gerador}`,
+        "",
+        `Última atualização: ${new Date().toLocaleString("pt-BR")}`,
+        `Leitura: ${metodo}`,
+        "",
+        "Observação: caso seja apenas falha da concessionária com a rede reserva operando corretamente, estou ciente de que não há atuação direta da empresa."
+      ].join("\n");
+
+      setText("mensagemSuporte", mensagemSuporteAtual);
+    }
+
+    function abrirWhatsAppSuporte() {
+      const texto = encodeURIComponent(mensagemSuporteAtual);
+      window.open(`https://wa.me/${WHATSAPP_SUPORTE}?text=${texto}`, "_blank");
+    }
+
+    async function copiarDiagnosticoSuporte() {
+      try {
+        await navigator.clipboard.writeText(mensagemSuporteAtual);
+        setText("statusSuporte", "Diagnóstico copiado. Agora você pode colar em qualquer conversa.");
+      } catch {
+        setText("statusSuporte", "Não consegui copiar automaticamente. Selecione a prévia da mensagem e copie manualmente.");
+      }
+    }
+
+    function desenharEventos(eventos) {
+      const el = document.getElementById("eventosLista");
+      el.innerHTML = "";
+      const lista = Object.values(eventos || {}).reverse().slice(0, 8);
+
+      if (!lista.length) {
+        el.textContent = "Sem eventos cadastrados.";
+        return;
+      }
+
+      lista.forEach((evento) => {
+        const div = document.createElement("div");
+        div.className = "event";
+        const titulo = document.createElement("strong");
+        const detalhe = document.createElement("div");
+        titulo.textContent = evento.tipo ?? "evento";
+        detalhe.className = "small";
+        detalhe.textContent = `${evento.modo ?? "--"} - ${evento.timestamp ?? "--"}`;
+        div.appendChild(titulo);
+        div.appendChild(detalhe);
+        el.appendChild(div);
+      });
+    }
+
+    function normalizarSistema(valor) {
+      const s = valor ?? {};
+      const rede = typeof s.rede === "object" && s.rede !== null ? s.rede : {};
+      const gerador = typeof s.gerador === "object" && s.gerador !== null ? s.gerador : {};
+      const redeStatus = primeiro(rede, ["status", "ativa", "ativo"]) ?? primeiro(s, ["rede_status", "redeStatus", "rede_ativa", "redeAtiva", "rede"]);
+      const geradorStatus = primeiro(gerador, ["status", "ligado", "ativo"]) ?? primeiro(s, ["gerador_status", "geradorStatus", "gerador_ligado", "geradorLigado", "gerador"]);
+      const redeTensao = Number(primeiro(rede, ["tensao", "voltagem", "volts"]) ?? primeiro(s, ["tensao", "tensao_rede", "tensaoRede", "voltagem", "volts"]) ?? 0);
+      const geradorTensao = Number(primeiro(gerador, ["tensao", "voltagem", "volts"]) ?? primeiro(s, ["tensao_gerador", "tensaoGerador"]) ?? 0);
+      const tensaoNominal = normalizarTensaoNominal(primeiro(s, ["tensao_nominal", "tensaoNominal"]) ?? primeiro(s.configuracao, ["tensao_nominal", "tensaoNominal"]), redeTensao, geradorTensao);
+      const fonteAtiva = String(primeiro(s, ["fonte_ativa", "fonteAtiva", "fonte"]) ?? (bool(redeStatus) ? "REDE" : (bool(geradorStatus) ? "GERADOR" : "--"))).trim().toUpperCase();
+      const modo = String(primeiro(s, ["modo", "modo_sistema", "modoSistema"]) ?? fonteAtiva ?? "--").trim().toLowerCase();
+
+      return {
+        rede_status: bool(redeStatus),
+        gerador_status: bool(geradorStatus),
+        alarme: bool(primeiro(s, ["alarme", "alarme_status", "alarmeStatus", "falha", "emergencia"])),
+        tensao: fonteAtiva === "GERADOR" ? geradorTensao : redeTensao,
+        tensao_nominal: tensaoNominal,
+        motivo_falha_rede: String(primeiro(s, ["motivo_falha_rede", "motivoFalhaRede", "motivo_falha", "motivoFalha"]) ?? "normal").trim().toLowerCase(),
+        limite_falha_baixa: Number(primeiro(s, ["limite_falha_baixa", "limiteFalhaBaixa"]) ?? Math.round(tensaoNominal * 0.80)),
+        limite_falha_alta: Number(primeiro(s, ["limite_falha_alta", "limiteFalhaAlta"]) ?? Math.round(tensaoNominal * 1.15)),
+        limite_retorno_baixa: Number(primeiro(s, ["limite_retorno_baixa", "limiteRetornoBaixa"]) ?? Math.round(tensaoNominal * 0.90)),
+        limite_retorno_alta: Number(primeiro(s, ["limite_retorno_alta", "limiteRetornoAlta"]) ?? Math.round(tensaoNominal * 1.10)),
+        rede_tensao: redeTensao,
+        gerador_tensao: geradorTensao,
+        rede_fases: Number(primeiro(rede, ["fases_ativas", "fasesAtivas", "fases"]) ?? 0),
+        gerador_fases: Number(primeiro(gerador, ["fases_ativas", "fasesAtivas", "fases"]) ?? 0),
+        rede_sequencia_ok: bool(primeiro(rede, ["sequencia_fase_ok", "sequenciaFaseOk", "sequencia_ok"])),
+        gerador_sequencia_ok: bool(primeiro(gerador, ["sequencia_fase_ok", "sequenciaFaseOk", "sequencia_ok"])),
+        fonte_ativa: fonteAtiva,
+        estado: String(primeiro(s, ["estado", "state", "status_geral"]) ?? "--").trim().toUpperCase(),
+        modo,
+        falha_inicio: timestamp(primeiro(s, ["falha_inicio", "falhaInicio", "inicio_falha", "inicioFalha"]))
+      };
+    }
+
+    function normalizarTensaoNominal(valor, redeTensao = 0, geradorTensao = 0) {
+      const numero = Number(valor);
+      if (numero >= 100 && numero <= 140) return 110;
+      if (numero >= 200 && numero <= 250) return 220;
+      const referencia = Math.max(Number(redeTensao) || 0, Number(geradorTensao) || 0);
+      return referencia > 150 ? 220 : 110;
+    }
+
+    function tensaoDentroDaFaixa(tensao, sistema, tipo = "retorno") {
+      const valor = Number(tensao) || 0;
+      const nominal = normalizarTensaoNominal(sistema?.tensao_nominal, valor, 0);
+      const baixo = Number(sistema?.[`limite_${tipo}_baixa`]) || Math.round(nominal * (tipo === "falha" ? 0.80 : 0.90));
+      const alto = Number(sistema?.[`limite_${tipo}_alta`]) || Math.round(nominal * (tipo === "falha" ? 1.15 : 1.10));
+      return valor >= baixo && valor <= alto;
+    }
+
+    function textoFaixaTensao(sistema, tipo = "retorno") {
+      const nominal = normalizarTensaoNominal(sistema?.tensao_nominal);
+      const baixo = Number(sistema?.[`limite_${tipo}_baixa`]) || Math.round(nominal * (tipo === "falha" ? 0.80 : 0.90));
+      const alto = Number(sistema?.[`limite_${tipo}_alta`]) || Math.round(nominal * (tipo === "falha" ? 1.15 : 1.10));
+      return `${baixo} a ${alto} V`;
+    }
+
+    function explicarMotivoFalha(motivo) {
+      if (motivo === "subtensao") return "subtensão";
+      if (motivo === "sobretensao") return "sobretensão";
+      return "normal";
+    }
+
+    function normalizarEstatisticas(valor) {
+      const e = valor ?? {};
+      return {
+        quedas_energia: Number(primeiro(e, ["quedas_energia", "quedasEnergia", "quedas", "falhas_rede"]) ?? 0),
+        tempo_total_sem_rede: Number(primeiro(e, ["tempo_total_sem_rede", "tempoTotalSemRede", "tempo_sem_rede", "tempoSemRede"]) ?? 0),
+        acionamentos_gerador: Number(primeiro(e, ["acionamentos_gerador", "acionamentosGerador", "partidas_gerador", "partidasGerador"]) ?? 0)
+      };
+    }
+
+    function normalizarEventos(valor) {
+      if (!valor) return {};
+      if (Array.isArray(valor)) {
+        return valor.reduce((acc, item, index) => {
+          if (item) acc[index] = item;
+          return acc;
+        }, {});
+      }
+      return valor;
+    }
+
+    function primeiro(obj, chaves) {
+      for (const chave of chaves) {
+        if (obj && obj[chave] !== undefined && obj[chave] !== null) return obj[chave];
+      }
+      return undefined;
+    }
+
+    function bool(valor) {
+      if (valor === true || valor === 1) return true;
+      if (valor === false || valor === 0 || valor === null || valor === undefined) return false;
+      return ["true", "1", "sim", "on", "ligado", "ativa", "ativo", "falha", "emergencia"].includes(String(valor).trim().toLowerCase());
+    }
+
+    function timestamp(valor) {
+      if (valor === undefined || valor === null || valor === "") return null;
+      const n = Number(valor);
+      if (!Number.isFinite(n) || n <= 0) return null;
+      return n < 1000000000000 ? n * 1000 : n;
+    }
+
+    function setStatus(tipo, titulo, texto) {
+      setPill("statusPill", tipo, titulo);
+      setText("statusTexto", texto);
+      setText("estadoConexaoTexto", titulo);
+    }
+
+    function setPill(id, tipo, texto) {
+      const el = document.getElementById(id);
+      el.className = `pill ${tipo}`;
+      el.textContent = texto;
+    }
+
+    function setCardState(id, tipo) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("ok-state", "warn-state", "bad-state", "neutral-state");
+      el.classList.add(`${tipo || "neutral"}-state`);
+    }
+
+    function setFlow(id, textId, texto, tipo) {
+      const el = document.getElementById(id);
+      if (el) el.className = `flow-step ${tipo || ""}`.trim();
+      setText(textId, texto);
+    }
+
+    function atualizarGraficoMobile(tensaoRede, tensaoGerador, sistema = null) {
+      historicoRede.push(Number(tensaoRede) || 0);
+      historicoGerador.push(Number(tensaoGerador) || 0);
+      if (historicoRede.length > maxPontosGrafico) historicoRede.shift();
+      if (historicoGerador.length > maxPontosGrafico) historicoGerador.shift();
+
+      const canvas = document.getElementById("graficoMobile");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      const largura = canvas.width;
+      const altura = canvas.height;
+
+      ctx.clearRect(0, 0, largura, altura);
+      ctx.fillStyle = "#050d19";
+      ctx.fillRect(0, 0, largura, altura);
+
+      ctx.strokeStyle = "rgba(159, 178, 204, 0.16)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = 22 + ((altura - 44) / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(34, y);
+        ctx.lineTo(largura - 12, y);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "#9fb2cc";
+      ctx.font = "18px Arial";
+      const escalaMax = escalaMaximaGrafico(sistema);
+      const limiteBaixo = Number(sistema?.limite_falha_baixa) || Math.round(normalizarTensaoNominal(sistema?.tensao_nominal) * 0.80);
+      ctx.fillText(`${escalaMax} V`, 8, 24);
+      ctx.fillText(`${limiteBaixo} V`, 8, Math.round(valorParaY(limiteBaixo, altura, escalaMax)));
+      ctx.fillText("0 V", 12, altura - 10);
+
+      const y180 = valorParaY(limiteBaixo, altura, escalaMax);
+      ctx.strokeStyle = "rgba(255, 200, 74, 0.45)";
+      ctx.setLineDash([8, 8]);
+      ctx.beginPath();
+      ctx.moveTo(34, y180);
+      ctx.lineTo(largura - 12, y180);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      desenharLinhaMobile(ctx, historicoRede, "#4fd6e8", largura, altura, escalaMax);
+      desenharLinhaMobile(ctx, historicoGerador, "#ffc84a", largura, altura, escalaMax);
+    }
+
+    function desenharLinhaMobile(ctx, historico, cor, largura, altura, escalaMax = 240) {
+      if (historico.length < 2) return;
+
+      ctx.strokeStyle = cor;
+      ctx.lineWidth = 4;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+      ctx.beginPath();
+
+      historico.forEach((valor, indice) => {
+        const x = 34 + (indice / (maxPontosGrafico - 1)) * (largura - 48);
+        const y = valorParaY(valor, altura, escalaMax);
+        if (indice === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+    }
+
+    function escalaMaximaGrafico(sistema) {
+      const nominal = normalizarTensaoNominal(sistema?.tensao_nominal);
+      return Math.round(nominal * 1.30);
+    }
+
+    function valorParaY(valor, altura, escalaMax = 240) {
+      const escala = Number(escalaMax) || 240;
+      const limitado = Math.max(0, Math.min(escala, Number(valor) || 0));
+      return altura - 22 - (limitado / escala) * (altura - 44);
+    }
+
+    function setLamp(id, ligado) {
+      document.getElementById(id).classList.toggle("on", ligado);
+    }
+
+    function setBotoes(disabled) {
+      ["btnAtualizar"].forEach((id) => {
+        const botao = document.getElementById(id);
+        if (botao) botao.disabled = disabled;
+      });
+    }
+
+    function setText(id, texto) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = texto;
+    }
+
+    function formatarTempo(valor) {
+      const total = Number(valor) || 0;
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      if (h) return `${h} h ${m} min ${s} s`;
+      if (m) return `${m} min ${s} s`;
+      return `${s} s`;
+    }
+
+    function explicarErro(erro) {
+      const msg = String(erro?.message || erro);
+      if (msg.includes("Failed to fetch") || msg.includes("bloqueado")) return "O navegador bloqueou ou não conseguiu alcançar o Firebase. Confira internet, Wi-Fi/dados móveis e permissões do navegador.";
+      if (msg.includes("Tempo esgotado") || msg.includes("abort")) return "A conexão com o Firebase demorou demais. Tente atualizar novamente.";
+      if (msg.includes("HTTP 401") || msg.includes("HTTP 403")) return "O Firebase recusou a leitura. Verifique as regras do Realtime Database.";
+      return msg;
+    }
+  </script>
+</body>
+</html>
+
+
+

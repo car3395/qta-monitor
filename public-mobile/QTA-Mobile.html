@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supervisório QTA - Painel Completo</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #101b2c;
+      --panel-2: #0c1727;
+      --panel-3: #14243a;
+      --line: #273c5c;
+      --text: #edf4ff;
+      --muted: #9eb1cd;
+      --blue: #4f8cff;
+      --green: #2fd174;
+      --red: #ff5c5c;
+      --yellow: #ffc84a;
+      --cyan: #40d5e8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: #08101c;
+      border-right: 1px solid var(--line);
+      padding: 24px 18px;
+      overflow-y: auto;
+    }
+
+    .logo {
+      color: #fff;
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      margin-bottom: 22px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: #c7d7ee;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 12px 13px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.18s ease;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: #12233a;
+      border-color: #31527f;
+      color: #fff;
+    }
+
+    .side-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 14px;
+    }
+
+    .side-card h3 {
+      color: #dbe8fb;
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+
+    .side-item {
+      color: var(--muted);
+      font-size: 0.91rem;
+      line-height: 1.45;
+      margin-bottom: 8px;
+    }
+
+    .main {
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .topbar h1 {
+      font-size: 1.9rem;
+      margin-bottom: 6px;
+    }
+
+    .topbar p {
+      color: var(--muted);
+    }
+
+    .status-pill {
+      background: #13243b;
+      border: 1px solid #31527f;
+      border-radius: 8px;
+      color: #dceaff;
+      font-weight: 800;
+      padding: 12px 16px;
+    }
+
+    .alarm-banner {
+      display: none;
+      margin-bottom: 18px;
+      background: rgba(255, 92, 92, 0.13);
+      border: 1px solid rgba(255, 92, 92, 0.42);
+      border-left: 5px solid var(--red);
+      color: #ffb0b0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .alarm-banner.show {
+      display: block;
+    }
+
+    .status-hero {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+      padding: 18px;
+      background: #102033;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .status-hero h2 {
+      font-size: 1.45rem;
+      line-height: 1.15;
+    }
+
+    .status-hero p {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .status-hero.ok {
+      border-color: rgba(47, 209, 116, 0.58);
+      background: linear-gradient(135deg, rgba(47, 209, 116, 0.16), #102033 58%);
+    }
+
+    .status-hero.warn {
+      border-color: rgba(255, 200, 74, 0.68);
+      background: linear-gradient(135deg, rgba(255, 200, 74, 0.19), #102033 58%);
+    }
+
+    .status-hero.bad {
+      border-color: rgba(255, 92, 92, 0.72);
+      background: linear-gradient(135deg, rgba(255, 92, 92, 0.19), #102033 58%);
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 8px 0 14px;
+    }
+
+    .section-title h2 {
+      font-size: 1.24rem;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(160px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .three-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .two-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card.state-ok {
+      background: linear-gradient(180deg, rgba(47, 209, 116, 0.15), rgba(16, 27, 44, 0.94));
+      border-color: rgba(47, 209, 116, 0.62);
+      box-shadow: inset 0 0 0 1px rgba(47, 209, 116, 0.08), 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .card.state-warning {
+      background: linear-gradient(180deg, rgba(255, 200, 74, 0.18), rgba(16, 27, 44, 0.95));
+      border-color: rgba(255, 200, 74, 0.7);
+      box-shadow: inset 0 0 0 1px rgba(255, 200, 74, 0.1), 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .card.state-danger {
+      background: linear-gradient(180deg, rgba(255, 92, 92, 0.18), rgba(16, 27, 44, 0.95));
+      border-color: rgba(255, 92, 92, 0.72);
+      box-shadow: inset 0 0 0 1px rgba(255, 92, 92, 0.1), 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .card.state-neutral {
+      background: linear-gradient(180deg, rgba(79, 140, 255, 0.1), rgba(16, 27, 44, 0.95));
+      border-color: rgba(79, 140, 255, 0.42);
+    }
+
+    .card h2,
+    .card h3 {
+      color: #aec2de;
+      font-size: 0.96rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .value {
+      font-size: 1.88rem;
+      font-weight: 900;
+      line-height: 1.08;
+      margin-bottom: 11px;
+      word-break: break-word;
+    }
+
+    .small-value {
+      color: #f7fbff;
+      font-size: 1.18rem;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      min-height: 30px;
+      padding: 6px 11px;
+    }
+
+    .ok {
+      background: rgba(47, 209, 116, 0.14);
+      border-color: rgba(47, 209, 116, 0.38);
+      color: #58e38c;
+    }
+
+    .alerta {
+      background: rgba(255, 92, 92, 0.14);
+      border-color: rgba(255, 92, 92, 0.42);
+      color: #ff8484;
+    }
+
+    .aviso {
+      background: rgba(255, 200, 74, 0.14);
+      border-color: rgba(255, 200, 74, 0.4);
+      color: #ffd36d;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .info-item {
+      background: var(--panel-2);
+      border: 1px solid #263b5b;
+      border-radius: 8px;
+      padding: 13px;
+    }
+
+    .info-item strong {
+      color: #f0f6ff;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .info-item span,
+    .info-item div {
+      color: #b8c8df;
+      line-height: 1.35;
+    }
+
+    .lamp-panel {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .lamp-box {
+      background: var(--panel-2);
+      border: 1px solid #263b5b;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .lamp {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+      background: #2f3d55;
+      box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.38);
+    }
+
+    .lamp.green.on {
+      background: var(--green);
+      box-shadow: 0 0 14px var(--green), 0 0 28px rgba(47, 209, 116, 0.45);
+    }
+
+    .lamp.red.on {
+      background: var(--red);
+      box-shadow: 0 0 14px var(--red), 0 0 28px rgba(255, 92, 92, 0.45);
+    }
+
+    .lamp.yellow.on {
+      background: var(--yellow);
+      box-shadow: 0 0 14px var(--yellow), 0 0 28px rgba(255, 200, 74, 0.45);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      background: #1f3b66;
+      border: 1px solid #3b5f92;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-weight: 800;
+      padding: 11px 14px;
+      transition: 0.18s;
+    }
+
+    .btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-1px);
+    }
+
+    .btn.red {
+      background: #7d2020;
+      border-color: #bf4545;
+    }
+
+    .btn.green {
+      background: #155b34;
+      border-color: #33a363;
+    }
+
+    .btn:disabled {
+      cursor: wait;
+      opacity: 0.65;
+      transform: none;
+    }
+
+    .footer-note,
+    .muted {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+
+    .erro {
+      color: #ff8585;
+      font-weight: 800;
+      margin-top: 12px;
+    }
+
+    .chart-box {
+      background: var(--panel-2);
+      border: 1px solid #263b5b;
+      border-radius: 8px;
+      margin-top: 12px;
+      padding: 12px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 270px;
+      background: #081423;
+      border-radius: 8px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .events-table {
+      border-collapse: collapse;
+      margin-top: 12px;
+      min-width: 560px;
+      width: 100%;
+    }
+
+    .events-table th,
+    .events-table td {
+      border-bottom: 1px solid #263b5b;
+      font-size: 0.92rem;
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .events-table th {
+      background: #13233a;
+      color: #b6c8e2;
+      font-weight: 800;
+    }
+
+    .status-line {
+      display: grid;
+      gap: 10px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: 160px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel-2);
+      border: 1px solid #263b5b;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .bar {
+      height: 10px;
+      background: #26374d;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--green);
+      border-radius: inherit;
+      transition: width 0.25s ease, background 0.25s ease;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 34px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      background: var(--panel-2);
+      border: 1px solid #263b5b;
+      border-radius: 8px;
+      padding: 12px;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .step-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #34445a;
+      border: 2px solid #61728b;
+    }
+
+    .step.ok-step .step-dot {
+      background: var(--green);
+      border-color: #9ff0bd;
+    }
+
+    .step.ok-step {
+      border-color: rgba(47, 209, 116, 0.45);
+      background: rgba(47, 209, 116, 0.06);
+    }
+
+    .step.warn-step .step-dot {
+      background: var(--yellow);
+      border-color: #ffe49a;
+    }
+
+    .step.warn-step {
+      border-color: rgba(255, 200, 74, 0.55);
+      background: rgba(255, 200, 74, 0.07);
+    }
+
+    .step.alert-step .step-dot {
+      background: var(--red);
+      border-color: #ffb0b0;
+    }
+
+    .step.alert-step {
+      border-color: rgba(255, 92, 92, 0.58);
+      background: rgba(255, 92, 92, 0.08);
+    }
+
+    .step.neutral-step .step-dot {
+      background: #50617a;
+      border-color: #7f90aa;
+    }
+
+    .step.neutral-step {
+      border-color: #314765;
+      background: rgba(80, 97, 122, 0.08);
+    }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: stretch;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .source-box,
+    .load-box {
+      background: var(--panel-2);
+      border: 1px solid #263b5b;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 120px;
+    }
+
+    .transfer-box {
+      display: grid;
+      place-items: center;
+      color: #dbe8fb;
+      font-weight: 900;
+      min-width: 96px;
+    }
+
+    .source-box.active {
+      border-color: rgba(47, 209, 116, 0.8);
+      box-shadow: inset 0 0 0 1px rgba(47, 209, 116, 0.22);
+    }
+
+    .source-box.warning {
+      border-color: rgba(255, 200, 74, 0.85);
+      box-shadow: inset 0 0 0 1px rgba(255, 200, 74, 0.22);
+    }
+
+    .source-box.failure {
+      border-color: rgba(255, 92, 92, 0.9);
+      box-shadow: inset 0 0 0 1px rgba(255, 92, 92, 0.22);
+    }
+
+    .raw-box {
+      white-space: pre-wrap;
+      overflow: auto;
+      max-height: 380px;
+      background: #081423;
+      border: 1px solid #263b5b;
+      border-radius: 8px;
+      color: #cddcf0;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      margin-top: 12px;
+      padding: 14px;
+    }
+
+    @media (max-width: 1250px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .nav {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .grid-top {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .main-grid,
+      .two-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 850px) {
+      .main {
+        padding: 16px;
+      }
+
+      .nav,
+      .grid-top,
+      .three-grid,
+      .lamp-panel,
+      .diagram {
+        grid-template-columns: 1fr;
+      }
+
+      .status-row,
+      .step {
+        grid-template-columns: 1fr;
+      }
+
+      .transfer-box {
+        min-height: 44px;
+      }
+
+      .value {
+        font-size: 1.45rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">QTA Monitor</div>
+      <div class="subtitle">Supervisório web para acompanhamento da transferência automática de energia.</div>
+
+      <nav class="nav" aria-label="Telas do supervisório">
+        <button class="nav-btn active" data-screen-target="visao-geral">Visão geral</button>
+        <button class="nav-btn" data-screen-target="operacao">Operação</button>
+        <button class="nav-btn" data-screen-target="energia">Energia</button>
+        <button class="nav-btn" data-screen-target="sequencia">Sequência QTA</button>
+        <button class="nav-btn" data-screen-target="eventos">Eventos</button>
+        <button class="nav-btn" data-screen-target="simulacao">Simulação</button>
+        <button class="nav-btn" data-screen-target="diagnostico">Diagnóstico</button>
+      </nav>
+
+      <div class="side-card">
+        <h3>Status rápido</h3>
+        <div class="side-item"><strong>Última atualização:</strong> <span id="ultimaAtualizacaoSide">--</span></div>
+        <div class="side-item"><strong>Leitura:</strong> <span id="statusLeituraSide">Aguardando...</span></div>
+        <div class="side-item"><strong>Tela atual:</strong> <span id="telaAtual">Visão geral</span></div>
+      </div>
+
+      <div class="side-card">
+        <h3>Resumo operacional</h3>
+        <div class="side-item">Fonte ativa: <strong id="fonteAtivaSide">--</strong></div>
+        <div class="side-item">Condição: <strong id="condicaoSide">--</strong></div>
+        <div class="side-item">Falha atual: <strong id="falhaAtualSide">0 s</strong></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h1>Supervisório QTA</h1>
+          <p>Sistema inteligente de transferência automática de energia</p>
+        </div>
+        <div class="status-pill" id="statusConexao">Conectando ao Firebase...</div>
+      </div>
+
+      <div class="alarm-banner" id="alarmBanner">
+        ALARME ATIVO: sistema operando em condição de falha ou emergência.
+      </div>
+
+      <section class="screen active" id="screen-visao-geral">
+        <div class="section-title">
+          <div>
+            <h2>Visão Geral</h2>
+            <p>Estado principal do sistema para leitura rápida.</p>
+          </div>
+        </div>
+
+        <div class="status-hero" id="estadoGeralCard">
+          <span class="tag" id="estadoGeralTag">Aguardando leitura</span>
+          <h2 id="estadoGeralTitulo">Conectando ao sistema</h2>
+          <p id="estadoGeralTexto">Assim que o Firebase responder, este painel mostra se está tudo normal, se a reserva assumiu ou se precisa de suporte.</p>
+        </div>
+
+        <div class="grid-top">
+          <div class="card">
+            <h2>Modo do Sistema</h2>
+            <div class="value" id="modo">--</div>
+            <span class="tag" id="tagModo">Aguardando</span>
+          </div>
+          <div class="card" id="cardTensao">
+            <h2>Tensão</h2>
+            <div class="value" id="tensao">-- V</div>
+            <span class="tag" id="tagTensao">Sem leitura</span>
+          </div>
+          <div class="card" id="cardRede">
+            <h2>Rede Elétrica</h2>
+            <div class="value" id="redeStatus">--</div>
+            <span class="tag" id="tagRede">Aguardando</span>
+          </div>
+          <div class="card" id="cardGerador">
+            <h2>Gerador</h2>
+            <div class="value" id="geradorStatus">--</div>
+            <span class="tag" id="tagGerador">Aguardando</span>
+          </div>
+          <div class="card" id="cardAlarme">
+            <h2>Alarme</h2>
+            <div class="value" id="alarmeStatus">--</div>
+            <span class="tag" id="tagAlarme">Aguardando</span>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <h2>Painel Industrial</h2>
+            <div class="lamp-panel">
+              <div class="lamp-box">
+                <div class="lamp green" id="lampRede"></div>
+                <strong>REDE</strong>
+                <div id="txtLampRede">--</div>
+              </div>
+              <div class="lamp-box">
+                <div class="lamp yellow" id="lampGerador"></div>
+                <strong>GERADOR</strong>
+                <div id="txtLampGerador">--</div>
+              </div>
+              <div class="lamp-box">
+                <div class="lamp red" id="lampAlarme"></div>
+                <strong>ALARME</strong>
+                <div id="txtLampAlarme">--</div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn" id="btnAtualizar" onclick="recarregarAgora()">Atualizar agora</button>
+            </div>
+
+            <div class="footer-note">As simulações de queda e retorno ficam em uma tela separada para manter o painel principal limpo.</div>
+          </div>
+
+          <div class="card">
+            <h2>O que está acontecendo agora</h2>
+            <div class="info-list">
+              <div class="info-item">
+                <strong>Condição operacional</strong>
+                <span id="descricaoOperacao">Aguardando leitura...</span>
+              </div>
+              <div class="info-item">
+                <strong>Ação automática esperada</strong>
+                <span id="acaoEsperada">--</span>
+              </div>
+              <div class="info-item">
+                <strong>Fonte alimentando a carga</strong>
+                <span id="fonteCarga">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-simulacao">
+        <div class="section-title">
+          <div>
+            <h2>Simulação</h2>
+            <p>Área reservada para demonstração e testes controlados do QTA.</p>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card state-warning">
+            <h2>Controle de demonstração</h2>
+            <div class="info-list">
+              <div class="info-item">
+                <strong>Simular queda de energia</strong>
+                <span>Coloca a rede da concessionária em falha e aciona a reserva/gerador com 220 V.</span>
+              </div>
+              <div class="info-item">
+                <strong>Simular retorno da rede</strong>
+                <span>Restaura a concessionária para 220 V, desliga a reserva/gerador e normaliza o sistema.</span>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="btn red" id="btnQueda" onclick="simularQueda()">Simular queda de energia</button>
+              <button class="btn green" id="btnRetorno" onclick="simularRetorno()">Simular retorno da rede</button>
+              <button class="btn" id="btnAtualizarSim" onclick="recarregarAgora()">Atualizar leitura</button>
+            </div>
+
+            <div class="footer-note">Atenção: estes botões gravam novos valores no Firebase e alteram o estado visto no mobile e no desktop.</div>
+            <div class="erro" id="erroAcao"></div>
+          </div>
+
+          <div class="card">
+            <h2>Estado esperado após cada ação</h2>
+            <div class="info-list">
+              <div class="info-item">
+                <strong>Após queda</strong>
+                <span>Rede: falha / 0 V. Reserva: ligada / 220 V. Fonte ativa: GERADOR.</span>
+              </div>
+              <div class="info-item">
+                <strong>Após retorno</strong>
+                <span>Rede: normal / 220 V. Reserva: em espera / 0 V. Fonte ativa: REDE.</span>
+              </div>
+              <div class="info-item">
+                <strong>Uso recomendado</strong>
+                <span>Use esta tela apenas durante testes, apresentação ou validação técnica.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-operacao">
+        <div class="section-title">
+          <div>
+            <h2>Operação em Tempo Real</h2>
+            <p>Detalhamento dos sinais principais e dos contadores do sistema.</p>
+          </div>
+        </div>
+
+        <div class="three-grid">
+          <div class="card">
+            <h3>Quedas de energia</h3>
+            <div class="value" id="quedasEnergia">0</div>
+            <span class="tag aviso">Ocorrências registradas</span>
+          </div>
+          <div class="card">
+            <h3>Tempo total sem rede</h3>
+            <div class="value" id="tempoSemRede">0 s</div>
+            <span class="tag aviso">Acumulado</span>
+          </div>
+          <div class="card">
+            <h3>Acionamentos do gerador</h3>
+            <div class="value" id="acionamentosGerador">0</div>
+            <span class="tag ok">Partidas registradas</span>
+          </div>
+        </div>
+
+        <div class="two-grid">
+          <div class="card">
+            <h2>Sinais digitais</h2>
+            <div class="status-line">
+              <div class="status-row">
+                <strong>Entrada da rede</strong>
+                <div class="bar"><div class="bar-fill" id="barRede"></div></div>
+                <span id="detRede">--</span>
+              </div>
+              <div class="status-row">
+                <strong>Comando gerador</strong>
+                <div class="bar"><div class="bar-fill" id="barGerador"></div></div>
+                <span id="detGerador">--</span>
+              </div>
+              <div class="status-row">
+                <strong>Alarme geral</strong>
+                <div class="bar"><div class="bar-fill" id="barAlarme"></div></div>
+                <span id="detAlarme">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Informações do Sistema</h2>
+            <div class="info-list">
+              <div class="info-item">
+                <strong>Última atualização</strong>
+                <span id="ultimaAtualizacao">--</span>
+              </div>
+              <div class="info-item">
+                <strong>Falha atual</strong>
+                <span id="falhaAtual">0 s</span>
+              </div>
+              <div class="info-item">
+                <strong>Status da leitura</strong>
+                <span id="statusLeitura">Aguardando...</span>
+              </div>
+              <div class="info-item">
+                <strong>Fonte de dados</strong>
+                <span>Firebase Realtime Database</span>
+              </div>
+            </div>
+            <div class="erro" id="erroMsg"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-energia">
+        <div class="section-title">
+          <div>
+            <h2>Energia e Tensão</h2>
+            <p>Análise da tensão, faixa operacional e histórico das últimas leituras.</p>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <h2>Gráfico de Tensão</h2>
+            <div class="chart-box">
+              <canvas id="graficoTensao" width="900" height="270"></canvas>
+            </div>
+            <div class="muted">O grafico mostra a rede concessionaria e a rede reserva/gerador em linhas separadas.</div>
+          </div>
+
+          <div class="card">
+            <h2>Qualidade da alimentação</h2>
+            <div class="info-list">
+              <div class="info-item">
+                <strong>Classificação</strong>
+                <span id="qualidadeEnergia">--</span>
+              </div>
+              <div class="info-item">
+                <strong>Faixa configurada</strong>
+                <span>Normal: 180 V a 240 V</span>
+              </div>
+              <div class="info-item">
+                <strong>Tensao da rede concessionaria</strong>
+                <span id="ultimaTensaoDetalhe">-- V</span>
+              </div>
+              <div class="info-item">
+                <strong>Variação recente</strong>
+                <span id="variacaoTensao">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-sequencia">
+        <div class="section-title">
+          <div>
+            <h2>Sequência QTA</h2>
+            <p>Leitura didática do processo de transferência entre rede e gerador.</p>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <h2>Fluxo de alimentação</h2>
+            <div class="diagram">
+              <div class="source-box" id="boxRede">
+                <h3>Rede elétrica</h3>
+                <div class="small-value" id="diagRede">--</div>
+                <p class="muted" id="diagRedeDesc">Aguardando leitura.</p>
+              </div>
+              <div class="transfer-box">QTA</div>
+              <div class="source-box" id="boxGerador">
+                <h3>Gerador</h3>
+                <div class="small-value" id="diagGerador">--</div>
+                <p class="muted" id="diagGeradorDesc">Aguardando leitura.</p>
+              </div>
+            </div>
+            <div class="load-box" style="margin-top: 12px;">
+              <h3>Carga protegida</h3>
+              <div class="small-value" id="diagCarga">--</div>
+              <p class="muted" id="diagCargaDesc">Aguardando leitura.</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Etapas do processo</h2>
+            <div class="timeline">
+              <div class="step" id="stepRede">
+                <div class="step-dot"></div>
+                <div>
+                  <strong>1. Rede disponível</strong>
+                  <div class="muted">Confirma se existe tensão útil na entrada da rede.</div>
+                </div>
+                <span id="stepRedeTxt">--</span>
+              </div>
+              <div class="step" id="stepFalha">
+                <div class="step-dot"></div>
+                <div>
+                  <strong>2. Falha detectada</strong>
+                  <div class="muted">Identifica queda de energia ou tensão abaixo da faixa.</div>
+                </div>
+                <span id="stepFalhaTxt">--</span>
+              </div>
+              <div class="step" id="stepGerador">
+                <div class="step-dot"></div>
+                <div>
+                  <strong>3. Gerador acionado</strong>
+                  <div class="muted">Comanda o gerador para manter a carga alimentada.</div>
+                </div>
+                <span id="stepGeradorTxt">--</span>
+              </div>
+              <div class="step" id="stepRetorno">
+                <div class="step-dot"></div>
+                <div>
+                  <strong>4. Retorno para rede</strong>
+                  <div class="muted">Quando a rede volta, o sistema retorna ao modo normal.</div>
+                </div>
+                <span id="stepRetornoTxt">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-eventos">
+        <div class="section-title">
+          <div>
+            <h2>Alarmes e Eventos</h2>
+            <p>Histórico detalhado das últimas ocorrências registradas.</p>
+          </div>
+        </div>
+
+        <div class="main-grid">
+          <div class="card">
+            <h2>Histórico de Eventos</h2>
+            <div class="table-wrap">
+              <table class="events-table">
+                <thead>
+                  <tr>
+                    <th>Evento</th>
+                    <th>Modo</th>
+                    <th>Data/Hora</th>
+                    <th>Interpretação</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaEventos">
+                  <tr>
+                    <td colspan="4">Sem eventos cadastrados.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Resumo de alarmes</h2>
+            <div class="info-list">
+              <div class="info-item">
+                <strong>Alarme atual</strong>
+                <span id="alarmeDetalhe">--</span>
+              </div>
+              <div class="info-item">
+                <strong>Possível causa</strong>
+                <span id="causaProvavel">--</span>
+              </div>
+              <div class="info-item">
+                <strong>Recomendação</strong>
+                <span id="recomendacaoOperador">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="screen-diagnostico">
+        <div class="section-title">
+          <div>
+            <h2>Diagnóstico</h2>
+            <p>Dados brutos e verificação dos principais campos recebidos.</p>
+          </div>
+        </div>
+
+        <div class="two-grid">
+          <div class="card">
+            <h2>Campos esperados</h2>
+            <div class="info-list">
+              <div class="info-item"><strong>Rede concessionaria</strong><span id="rawRedeStatus">--</span></div>
+              <div class="info-item"><strong>Rede reserva / gerador</strong><span id="rawGeradorStatus">--</span></div>
+              <div class="info-item"><strong>Alarme</strong><span id="rawAlarme">--</span></div>
+              <div class="info-item"><strong>Modo de operacao</strong><span id="rawModo">--</span></div>
+              <div class="info-item"><strong>Tensoes recebidas</strong><span id="rawTensao">--</span></div>
+              <div class="info-item"><strong>Inicio da falha</strong><span id="rawFalhaInicio">--</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Resumo dos dados</h2>
+            <pre class="raw-box" id="dadosBrutos">Aguardando leitura...</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const FIREBASE_BASE_URL = "https://qta-monitor-default-rtdb.firebaseio.com";
+    const historicoTensaoRede = [];
+    const historicoTensaoGerador = [];
+    const maxPontos = 24;
+    let ultimoPacote = null;
+
+    document.querySelectorAll(".nav-btn").forEach((botao) => {
+      botao.addEventListener("click", () => trocarTela(botao.dataset.screenTarget, botao.textContent));
+    });
+
+    function trocarTela(tela, nome) {
+      document.querySelectorAll(".nav-btn").forEach((botao) => {
+        botao.classList.toggle("active", botao.dataset.screenTarget === tela);
+      });
+
+      document.querySelectorAll(".screen").forEach((screen) => {
+        screen.classList.toggle("active", screen.id === `screen-${tela}`);
+      });
+
+      document.getElementById("telaAtual").textContent = nome;
+      if (ultimoPacote) {
+        const sistema = normalizarSistema(ultimoPacote.sistema);
+        atualizarGrafico(sistema.rede_tensao, sistema.gerador_tensao, false);
+      }
+    }
+
+    async function buscarDados() {
+      const statusConexao = document.getElementById("statusConexao");
+      const statusLeitura = document.getElementById("statusLeitura");
+      const statusLeituraSide = document.getElementById("statusLeituraSide");
+      const erroMsg = document.getElementById("erroMsg");
+
+      try {
+        statusConexao.textContent = "Atualizando dados...";
+        statusLeitura.textContent = "Lendo banco...";
+        statusLeituraSide.textContent = "Lendo banco...";
+        erroMsg.textContent = "";
+
+        const [sistemaRes, estatisticasRes, eventosRes] = await Promise.all([
+          fetch(`${FIREBASE_BASE_URL}/sistema.json`),
+          fetch(`${FIREBASE_BASE_URL}/estatisticas.json`),
+          fetch(`${FIREBASE_BASE_URL}/eventos.json`)
+        ]);
+
+        if (!sistemaRes.ok || !estatisticasRes.ok || !eventosRes.ok) {
+          throw new Error("Não foi possível ler os dados do Firebase.");
+        }
+
+        const sistema = await sistemaRes.json();
+        const estatisticas = await estatisticasRes.json();
+        const eventos = await eventosRes.json();
+        ultimoPacote = { sistema, estatisticas, eventos };
+
+        atualizarInterface(sistema, estatisticas, eventos);
+
+        const agora = new Date().toLocaleString("pt-BR");
+        statusConexao.textContent = "Conectado ao Firebase";
+        statusLeitura.textContent = "Leitura realizada com sucesso";
+        statusLeituraSide.textContent = "Leitura OK";
+        document.getElementById("ultimaAtualizacao").textContent = agora;
+        document.getElementById("ultimaAtualizacaoSide").textContent = agora;
+      } catch (erro) {
+        console.error(erro);
+        statusConexao.textContent = "Falha na conexão";
+        statusLeitura.textContent = "Erro ao ler dados";
+        statusLeituraSide.textContent = "Erro";
+        erroMsg.textContent = "Erro: " + erro.message;
+      }
+    }
+
+    function normalizarSistema(valor) {
+      const s = valor ?? {};
+      const rede = typeof s.rede === "object" && s.rede !== null ? s.rede : {};
+      const gerador = typeof s.gerador === "object" && s.gerador !== null ? s.gerador : {};
+      const redeTensao = Number(primeiroValor(rede, ["tensao", "voltagem"]) ?? primeiroValor(s, ["rede_tensao", "tensao_rede", "tensao"]) ?? 0);
+      const geradorTensao = Number(primeiroValor(gerador, ["tensao", "voltagem"]) ?? primeiroValor(s, ["gerador_tensao", "tensao_gerador"]) ?? 0);
+      const redeStatus = booleano(primeiroValor(rede, ["status", "ativa", "ativo"]) ?? primeiroValor(s, ["rede_status", "rede"]));
+      const geradorStatus = booleano(primeiroValor(gerador, ["status", "ativa", "ativo"]) ?? primeiroValor(s, ["gerador_status", "gerador"]));
+      let fonteAtiva = String(primeiroValor(s, ["fonte_ativa", "fonteAtiva"]) ?? (geradorStatus ? "GERADOR" : "REDE")).toUpperCase();
+      if (!redeStatus && (geradorStatus || geradorTensao > 0)) fonteAtiva = "GERADOR";
+      if (redeStatus && !geradorStatus) fonteAtiva = "REDE";
+      const modoInformado = String(primeiroValor(s, ["modo"]) ?? (fonteAtiva === "GERADOR" ? "gerador" : "rede")).toLowerCase();
+      const modo = fonteAtiva === "GERADOR" ? "gerador" : modoInformado;
+
+      return {
+        rede_status: redeStatus,
+        gerador_status: geradorStatus,
+        alarme: booleano(primeiroValor(s, ["alarme", "alerta"])),
+        tensao: fonteAtiva === "GERADOR" ? geradorTensao : redeTensao,
+        rede_tensao: redeTensao,
+        gerador_tensao: geradorTensao,
+        rede_fases: Number(primeiroValor(rede, ["fases_ativas", "fasesAtivas", "fases"]) ?? 0),
+        gerador_fases: Number(primeiroValor(gerador, ["fases_ativas", "fasesAtivas", "fases"]) ?? 0),
+        rede_sequencia_ok: booleano(primeiroValor(rede, ["sequencia_fase_ok", "sequenciaFaseOk", "sequencia_ok"])),
+        gerador_sequencia_ok: booleano(primeiroValor(gerador, ["sequencia_fase_ok", "sequenciaFaseOk", "sequencia_ok"])),
+        fonte_ativa: fonteAtiva,
+        estado: String(primeiroValor(s, ["estado", "state", "status_geral"]) ?? "--").trim().toUpperCase(),
+        modo,
+        falha_inicio: normalizarTimestamp(primeiroValor(s, ["falha_inicio", "falhaInicio", "inicio_falha", "inicioFalha"]))
+      };
+    }
+
+    function primeiroValor(objeto, chaves) {
+      for (const chave of chaves) {
+        if (objeto && objeto[chave] !== undefined && objeto[chave] !== null) return objeto[chave];
+      }
+      return undefined;
+    }
+
+    function booleano(valor) {
+      if (valor === true || valor === 1) return true;
+      if (valor === false || valor === 0 || valor === null || valor === undefined) return false;
+      return ["true", "1", "sim", "on", "ligado", "ativa", "ativo", "falha", "emergencia"].includes(String(valor).trim().toLowerCase());
+    }
+
+    function normalizarTimestamp(valor) {
+      if (valor === undefined || valor === null || valor === "") return null;
+      const numero = Number(valor);
+      if (!Number.isFinite(numero) || numero <= 0) return null;
+      return numero < 1000000000000 ? numero * 1000 : numero;
+    }
+
+    function atualizarInterface(sistema, estatisticas, eventos) {
+      if (!sistema) return;
+      sistema = normalizarSistema(sistema);
+
+      const redeAtiva = sistema.rede_status === true;
+      const geradorLigado = sistema.gerador_status === true;
+      const alarmeAtivo = sistema.alarme === true;
+      const tensao = Number(sistema.rede_tensao ?? 0);
+      const modo = String(sistema.modo ?? "--");
+      const falhaInicio = sistema.falha_inicio ?? null;
+      const segundosFalhaAtual = !redeAtiva && falhaInicio ? Math.max(0, Math.floor((Date.now() - falhaInicio) / 1000)) : 0;
+      const estadoCliente = obterEstadoCliente(sistema);
+
+      atualizarEstadoGeral(estadoCliente);
+      setText("modo", sistema.fonte_ativa === "GERADOR" ? "GERADOR" : modo.toUpperCase());
+      setText("tensao", `Rede ${sistema.rede_tensao} V`);
+      setText("redeStatus", redeAtiva ? "ATIVA" : "FALHA");
+      setText("geradorStatus", sistema.gerador_tensao > 0 ? `${sistema.gerador_tensao} V` : (geradorLigado ? "LIGADO" : "DESLIGADO"));
+      setText("alarmeStatus", alarmeAtivo ? "ATIVO" : "NORMAL");
+
+      setCardState("cardTensao", sistema.rede_tensao >= 180 ? "ok" : "danger");
+      setCardState("cardRede", redeAtiva ? "ok" : "danger");
+      setCardState("cardGerador", geradorLigado ? "warning" : "neutral");
+      setCardState("cardAlarme", alarmeAtivo ? "danger" : "ok");
+
+      setTag("tagModo", sistema.fonte_ativa === "GERADOR" ? "Reserva alimentando" : "Modo normal", sistema.fonte_ativa === "GERADOR" ? "aviso" : "ok");
+      setTag("tagTensao", sistema.rede_tensao >= 180 ? "Rede concessionaria OK" : "Rede concessionaria baixa", sistema.rede_tensao >= 180 ? "ok" : "alerta");
+      setTag("tagRede", redeAtiva ? `${sistema.rede_fases} fases | Sequencia ${sistema.rede_sequencia_ok ? "OK" : "falha"}` : "Sem fornecimento", redeAtiva ? "ok" : "alerta");
+      setTag("tagGerador", geradorLigado ? `Ligado | ${sistema.gerador_fases} fases` : (sistema.gerador_tensao > 0 ? `Disponivel | ${sistema.gerador_fases} fases` : "Gerador em espera"), geradorLigado ? "aviso" : "ok");
+      setTag("tagAlarme", alarmeAtivo ? "Falha detectada" : "Sistema estável", alarmeAtivo ? "alerta" : "ok");
+
+      atualizarLamps(redeAtiva, geradorLigado, alarmeAtivo);
+      atualizarBannerAlarme(alarmeAtivo);
+      atualizarResumoOperacional(redeAtiva, geradorLigado, alarmeAtivo, tensao, segundosFalhaAtual);
+      atualizarOperacaoDetalhada(redeAtiva, geradorLigado, alarmeAtivo, estatisticas, segundosFalhaAtual);
+      atualizarEnergia(tensao);
+      atualizarSequencia(redeAtiva, geradorLigado, alarmeAtivo, tensao);
+      atualizarAlarmes(redeAtiva, geradorLigado, alarmeAtivo, tensao);
+      atualizarDiagnostico(sistema, estatisticas, eventos);
+      atualizarTabelaEventos(eventos);
+      atualizarGrafico(sistema.rede_tensao, sistema.gerador_tensao, true);
+    }
+
+    function obterEstadoCliente(sistema) {
+      const redeOk = sistema.rede_status && sistema.rede_tensao >= 180;
+      const reservaOk = sistema.gerador_status && sistema.gerador_tensao >= 180;
+
+      if (redeOk && !sistema.gerador_status && !sistema.alarme) {
+        return {
+          classe: "ok",
+          titulo: "Operação normal",
+          etiqueta: "Tudo normal",
+          texto: "A rede da concessionaria está alimentando a carga. A reserva/gerador permanece em espera."
+        };
+      }
+
+      if (!redeOk && reservaOk) {
+        return {
+          classe: sistema.alarme ? "warn" : "warn",
+          titulo: "Concessionaria em falha, reserva ativa",
+          etiqueta: "Acompanhando",
+          texto: "A rede da concessionaria falhou, mas a reserva/gerador está alimentando a carga. A empresa só precisa agir se a reserva apresentar problema."
+        };
+      }
+
+      if (!redeOk && !reservaOk) {
+        return {
+          classe: "bad",
+          titulo: "Precisa de suporte",
+          etiqueta: "Ação necessária",
+          texto: "A concessionaria não está fornecendo energia e a rede reserva/gerador não foi confirmada. Verifique a instalação e acione o suporte."
+        };
+      }
+
+      if (sistema.alarme) {
+        return {
+          classe: "bad",
+          titulo: "Alarme ativo",
+          etiqueta: "Verificar",
+          texto: "Existe alarme ativo no sistema. Confira rede, reserva, tensão e fases antes de considerar a operação normal."
+        };
+      }
+
+      return {
+        classe: "warn",
+        titulo: "Atenção no sistema",
+        etiqueta: "Verificar",
+        texto: "O painel recebeu uma combinação incomum de sinais. Confira os detalhes técnicos e a leitura do Firebase."
+      };
+    }
+
+    function atualizarEstadoGeral(estado) {
+      const card = document.getElementById("estadoGeralCard");
+      if (card) {
+        card.className = `status-hero ${estado.classe}`;
+      }
+      setText("estadoGeralTitulo", estado.titulo);
+      setText("estadoGeralTexto", estado.texto);
+      setTag("estadoGeralTag", estado.etiqueta, estado.classe === "bad" ? "alerta" : estado.classe === "warn" ? "aviso" : "ok");
+    }
+
+    function atualizarResumoOperacional(redeAtiva, geradorLigado, alarmeAtivo, tensao, segundosFalhaAtual) {
+      const fonte = redeAtiva ? "Rede elétrica" : (geradorLigado ? "Gerador" : "Indefinida");
+      const condicao = alarmeAtivo ? "Emergência" : (tensao >= 180 ? "Normal" : "Atenção");
+
+      setText("fonteAtivaSide", fonte);
+      setText("condicaoSide", condicao);
+      setText("falhaAtualSide", formatarTempo(segundosFalhaAtual));
+      setText("falhaAtual", formatarTempo(segundosFalhaAtual));
+      setText("fonteCarga", fonte);
+
+      if (redeAtiva && !geradorLigado && !alarmeAtivo) {
+        setText("descricaoOperacao", "A rede está disponível, o gerador permanece em espera e a carga está alimentada pela rede.");
+        setText("acaoEsperada", "Manter alimentação pela rede e monitorar a tensão.");
+        return;
+      }
+
+      if (!redeAtiva && geradorLigado) {
+        setText("descricaoOperacao", alarmeAtivo ? "A rede da concessionaria falhou. A reserva assumiu a alimentacao e existe alarme ativo para verificacao." : "A rede da concessionaria falhou, mas a reserva/gerador assumiu a alimentacao normalmente.");
+        setText("acaoEsperada", alarmeAtivo ? "Verificar a rede reserva/gerador e acompanhar ate a normalizacao." : "Aguardar retorno da concessionaria. A empresa so precisa agir se houver problema na rede reserva.");
+        return;
+      }
+
+      setText("descricaoOperacao", "O sistema está em uma condição que exige verificação do operador.");
+      setText("acaoEsperada", "Conferir tensão, estado do gerador e alarmes antes de nova transferência.");
+    }
+
+    function atualizarOperacaoDetalhada(redeAtiva, geradorLigado, alarmeAtivo, estatisticas, segundosFalhaAtual) {
+      setText("quedasEnergia", estatisticas?.quedas_energia ?? 0);
+      setText("tempoSemRede", formatarTempo(estatisticas?.tempo_total_sem_rede ?? 0));
+      setText("acionamentosGerador", estatisticas?.acionamentos_gerador ?? 0);
+
+      setBar("barRede", redeAtiva ? 100 : 0, redeAtiva ? "green" : "red");
+      setBar("barGerador", geradorLigado ? 100 : 0, geradorLigado ? "yellow" : "green");
+      setBar("barAlarme", alarmeAtivo ? 100 : 0, alarmeAtivo ? "red" : "green");
+
+      setText("detRede", redeAtiva ? "Ativa" : "Falha");
+      setText("detGerador", geradorLigado ? "Ligado" : "Desligado");
+      setText("detAlarme", alarmeAtivo ? "Ativo" : "Normal");
+      setText("falhaAtual", formatarTempo(segundosFalhaAtual));
+    }
+
+    function atualizarEnergia(tensao) {
+      setText("ultimaTensaoDetalhe", `${tensao} V`);
+
+      if (tensao >= 200 && tensao <= 235) {
+        setText("qualidadeEnergia", "Rede concessionaria normal. Tensao dentro da faixa esperada.");
+      } else if (tensao >= 180 && tensao <= 240) {
+        setText("qualidadeEnergia", "Rede concessionaria aceitavel. A tensao ainda permite operacao, mas merece acompanhamento.");
+      } else {
+        setText("qualidadeEnergia", "Rede concessionaria critica. Tensao fora da faixa definida.");
+      }
+
+      if (historicoTensaoRede.length < 2) {
+        setText("variacaoTensao", "Aguardando mais leituras.");
+        return;
+      }
+
+      const anterior = historicoTensaoRede[historicoTensaoRede.length - 2];
+      const variacao = tensao - anterior;
+      const sinal = variacao > 0 ? "+" : "";
+      setText("variacaoTensao", `${sinal}${variacao} V em relacao a leitura anterior da rede concessionaria.`);
+    }
+
+    function atualizarSequencia(redeAtiva, geradorLigado, alarmeAtivo, tensao) {
+      setText("diagRede", redeAtiva ? "Disponível" : "Indisponível");
+      setText("diagGerador", geradorLigado ? "Em operação" : "Em espera");
+      setText("diagCarga", redeAtiva ? "Alimentada pela rede" : (geradorLigado ? "Alimentada pelo gerador" : "Sem fonte confirmada"));
+      setText("diagRedeDesc", redeAtiva ? `Entrada da rede com ${tensao} V.` : "Entrada da rede sem fornecimento válido.");
+      setText("diagGeradorDesc", geradorLigado ? "Gerador assumindo a alimentação da carga." : "Gerador parado, aguardando necessidade de partida.");
+      setText("diagCargaDesc", alarmeAtivo ? "Carga em condição de emergência monitorada." : "Carga em condição estável.");
+
+      setBoxState("boxRede", redeAtiva ? "active" : "failure");
+      setBoxState("boxGerador", geradorLigado ? "warning" : "");
+
+      setStep("stepRede", "stepRedeTxt", redeAtiva ? "Normal" : "Falha", redeAtiva ? "ok-step" : "alert-step");
+      setStep("stepFalha", "stepFalhaTxt", alarmeAtivo ? "Detectada" : "Sem falha", alarmeAtivo ? "alert-step" : "neutral-step");
+      setStep("stepGerador", "stepGeradorTxt", geradorLigado ? "Alimentando" : "Em espera", geradorLigado ? "warn-step" : "neutral-step");
+      setStep("stepRetorno", "stepRetornoTxt", redeAtiva && !geradorLigado ? "Concluido" : "Aguardando", redeAtiva && !geradorLigado ? "ok-step" : "neutral-step");
+    }
+
+    function atualizarAlarmes(redeAtiva, geradorLigado, alarmeAtivo, tensao) {
+      setText("alarmeDetalhe", alarmeAtivo ? "Alarme ativo no sistema." : "Nenhum alarme ativo.");
+
+      if (alarmeAtivo && !redeAtiva) {
+        setText("causaProvavel", "Queda da rede elétrica ou ausência de tensão na entrada principal.");
+        setText("recomendacaoOperador", geradorLigado ? "Acompanhar o gerador e aguardar o retorno estável da rede." : "Verificar se o gerador recebeu comando de partida.");
+      } else if (tensao < 180) {
+        setText("causaProvavel", "Tensão abaixo do limite mínimo configurado.");
+        setText("recomendacaoOperador", "Conferir alimentação de entrada e sensores de tensão.");
+      } else {
+        setText("causaProvavel", "Operação dentro da normalidade.");
+        setText("recomendacaoOperador", "Manter monitoramento periódico.");
+      }
+    }
+
+    function textoStatusDisponivel(valor) {
+      return valor ? "Disponivel / normal" : "Indisponivel / em falha";
+    }
+
+    function textoSequencia(valor) {
+      return valor ? "Sequencia correta" : "Falha ou nao confirmada";
+    }
+
+    function explicarEstadoCliente(estado) {
+      const mapa = {
+        REDE_NORMAL: "Rede da concessionaria normal",
+        REDE_FALHA_RESERVA_ATIVA: "Concessionaria em falha e reserva alimentando",
+        GERADOR_ATIVO: "Reserva / gerador alimentando",
+        ALARME: "Alarme ativo"
+      };
+      return mapa[estado] || estado || "Nao informado";
+    }
+
+    function montarResumoCliente(sistema, estatisticas, eventos) {
+      const totalEventos = eventos ? Object.keys(eventos).length : 0;
+      return [
+        "Resumo para o cliente",
+        "",
+        `Estado geral: ${explicarEstadoCliente(sistema?.estado)}`,
+        `Fonte alimentando agora: ${sistema?.fonte_ativa || "Nao informado"}`,
+        `Alarme: ${sistema?.alarme ? "Ativo" : "Sem alarme"}`,
+        "",
+        "Rede da concessionaria",
+        `Situacao: ${textoStatusDisponivel(sistema?.rede_status)}`,
+        `Tensao recebida: ${sistema?.rede_tensao ?? "--"} V`,
+        `Fases ativas: ${sistema?.rede_fases ?? "--"}`,
+        `Sequencia de fase: ${textoSequencia(sistema?.rede_sequencia_ok)}`,
+        "",
+        "Rede reserva / gerador",
+        `Situacao: ${sistema?.gerador_status ? "Em operacao" : "Em espera"}`,
+        `Tensao recebida: ${sistema?.gerador_tensao ?? "--"} V`,
+        `Fases ativas: ${sistema?.gerador_fases ?? "--"}`,
+        `Sequencia de fase: ${textoSequencia(sistema?.gerador_sequencia_ok)}`,
+        "",
+        "Historico",
+        `Quedas registradas: ${estatisticas?.quedas_energia ?? 0}`,
+        `Acionamentos da reserva: ${estatisticas?.acionamentos_gerador ?? 0}`,
+        `Eventos salvos: ${totalEventos}`
+      ].join("\n");
+    }
+
+    function atualizarDiagnostico(sistema, estatisticas, eventos) {
+      setText("rawRedeStatus", sistema?.rede_status ? "Disponivel / alimentando normal" : "Sem fornecimento ou em falha");
+      setText("rawGeradorStatus", sistema?.gerador_status ? "Em operacao / alimentando a carga" : "Em espera");
+      setText("rawAlarme", sistema?.alarme ? "Alarme ativo" : "Sem alarme");
+      setText("rawModo", sistema?.fonte_ativa === "GERADOR" ? "Reserva / gerador" : "Rede concessionaria");
+      setText("rawTensao", `Fonte: ${sistema?.fonte_ativa ?? "--"} | Rede: ${sistema?.rede_tensao ?? "--"} V | Reserva: ${sistema?.gerador_tensao ?? "--"} V`);
+      setText("rawFalhaInicio", sistema?.falha_inicio ? new Date(sistema.falha_inicio).toLocaleString("pt-BR") : "Sem falha em andamento");
+      setText("dadosBrutos", montarResumoCliente(sistema, estatisticas, eventos));
+    }
+
+    function atualizarBannerAlarme(alarmeAtivo) {
+      document.getElementById("alarmBanner").classList.toggle("show", alarmeAtivo);
+    }
+
+    function atualizarLamps(redeAtiva, geradorLigado, alarmeAtivo) {
+      setLamp("lampRede", "txtLampRede", redeAtiva, redeAtiva ? "ATIVA" : "FALHA");
+      setLamp("lampGerador", "txtLampGerador", geradorLigado, geradorLigado ? "LIGADO" : "DESLIGADO");
+      setLamp("lampAlarme", "txtLampAlarme", alarmeAtivo, alarmeAtivo ? "ATIVO" : "NORMAL");
+    }
+
+    function setLamp(lampId, textId, on, text) {
+      const lamp = document.getElementById(lampId);
+      setText(textId, text);
+      lamp.classList.toggle("on", on);
+    }
+
+    function setTag(id, texto, classe) {
+      const el = document.getElementById(id);
+      el.textContent = texto;
+      el.className = `tag ${classe}`;
+    }
+
+    function setCardState(id, state) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.remove("state-ok", "state-warning", "state-danger", "state-neutral");
+      el.classList.add(`state-${state}`);
+    }
+
+    function setBar(id, percent, color) {
+      const el = document.getElementById(id);
+      el.style.width = `${percent}%`;
+      el.style.background = color === "red" ? "var(--red)" : color === "yellow" ? "var(--yellow)" : "var(--green)";
+    }
+
+    function setStep(stepId, textId, texto, classe) {
+      const el = document.getElementById(stepId);
+      el.className = `step ${classe}`;
+      setText(textId, texto);
+    }
+
+    function setBoxState(id, state) {
+      const el = document.getElementById(id);
+      el.className = `source-box ${state}`.trim();
+    }
+
+    function setText(id, valor) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = valor;
+    }
+
+    function formatarTempo(valor) {
+      const totalSegundos = Number(valor) || 0;
+      const horas = Math.floor(totalSegundos / 3600);
+      const minutos = Math.floor((totalSegundos % 3600) / 60);
+      const segundos = totalSegundos % 60;
+
+      if (horas > 0) return `${horas} h ${minutos} min ${segundos} s`;
+      if (minutos > 0) return `${minutos} min ${segundos} s`;
+      return `${segundos} s`;
+    }
+
+    function atualizarGrafico(tensaoRede, tensaoGerador, adicionarPonto) {
+      if (adicionarPonto) {
+        historicoTensaoRede.push(Number(tensaoRede) || 0);
+        historicoTensaoGerador.push(Number(tensaoGerador) || 0);
+        if (historicoTensaoRede.length > maxPontos) historicoTensaoRede.shift();
+        if (historicoTensaoGerador.length > maxPontos) historicoTensaoGerador.shift();
+      }
+
+      const canvas = document.getElementById("graficoTensao");
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.strokeStyle = "#263b5b";
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i <= 6; i++) {
+        const y = (h / 6) * i;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "#9eb1cd";
+      ctx.font = "13px Arial";
+      ctx.fillText("240 V", 12, 18);
+      ctx.fillText("180 V", 12, h * 0.28);
+      ctx.fillText("0 V", 12, h - 12);
+
+      ctx.strokeStyle = "rgba(255, 200, 74, 0.55)";
+      ctx.setLineDash([7, 7]);
+      const y180 = h - ((180 / 240) * (h - 36)) - 18;
+      ctx.beginPath();
+      ctx.moveTo(0, y180);
+      ctx.lineTo(w, y180);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.font = "13px Arial";
+      ctx.fillStyle = "#40d5e8";
+      ctx.fillText("Rede concessionaria", 72, 18);
+      ctx.fillStyle = "#ffc84a";
+      ctx.fillText("Gerador/reserva", 240, 18);
+
+      desenharLinhaGrafico(ctx, historicoTensaoRede, "#40d5e8", w, h);
+      desenharLinhaGrafico(ctx, historicoTensaoGerador, "#ffc84a", w, h);
+    }
+
+    function desenharLinhaGrafico(ctx, historico, cor, w, h) {
+      if (historico.length < 2) return;
+
+      ctx.strokeStyle = cor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      historico.forEach((valor, i) => {
+        const x = (i / (maxPontos - 1)) * (w - 56) + 28;
+        const limitado = Math.max(0, Math.min(240, valor));
+        const y = h - ((limitado / 240) * (h - 36)) - 18;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+    }
+
+    function atualizarTabelaEventos(eventos) {
+      const tbody = document.getElementById("tabelaEventos");
+      tbody.innerHTML = "";
+
+      if (!eventos || Object.keys(eventos).length === 0) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.textContent = "Sem eventos cadastrados.";
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      Object.values(eventos).reverse().slice(0, 12).forEach((evento) => {
+        const tr = document.createElement("tr");
+        [evento.tipo ?? "--", evento.modo ?? "--", evento.timestamp ?? "--", interpretarEvento(evento.tipo)].forEach((valor) => {
+          const td = document.createElement("td");
+          td.textContent = valor;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    function interpretarEvento(tipo) {
+      if (tipo === "queda_rede") return "Rede falhou e sistema entrou em modo gerador.";
+      if (tipo === "retorno_rede") return "Rede retornou e sistema voltou ao modo normal.";
+      return "Evento registrado pelo sistema.";
+    }
+
+    async function simularQueda() {
+      setText("erroAcao", "");
+      setBotoesAcao(true);
+
+      try {
+        const sistemaAtualRes = await fetch(`${FIREBASE_BASE_URL}/sistema.json`);
+        const sistemaAtual = await sistemaAtualRes.json();
+
+        if (sistemaAtual?.falha_inicio) {
+          setText("erroAcao", "Já existe uma falha em andamento.");
+          return;
+        }
+
+        const agora = Date.now();
+
+        await fetch(`${FIREBASE_BASE_URL}/sistema.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modo: "gerador",
+            estado: "REDE_FALHA_RESERVA_ATIVA",
+            alarme: true,
+            fonte_ativa: "GERADOR",
+            rede_status: false,
+            gerador_status: true,
+            tensao: 0,
+            falha_inicio: agora,
+            rede: {
+              status: false,
+              tensao: 0,
+              fases_ativas: 0,
+              sequencia_fase_ok: false
+            },
+            gerador: {
+              status: true,
+              tensao: 220,
+              fases_ativas: 3,
+              sequencia_fase_ok: true
+            }
+          })
+        });
+
+        const res = await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`);
+        const atual = await res.json();
+
+        await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            quedas_energia: (atual?.quedas_energia ?? 0) + 1,
+            acionamentos_gerador: (atual?.acionamentos_gerador ?? 0) + 1
+          })
+        });
+
+        await registrarEvento("queda_rede", "gerador");
+        recarregarAgora();
+      } catch (e) {
+        setText("erroAcao", "Erro ao simular queda: " + (e?.message || e));
+      } finally {
+        setBotoesAcao(false);
+      }
+    }
+
+    async function simularRetorno() {
+      setText("erroAcao", "");
+      setBotoesAcao(true);
+
+      try {
+        const sistemaRes = await fetch(`${FIREBASE_BASE_URL}/sistema.json`);
+        const sistemaAtual = await sistemaRes.json();
+        const falhaInicio = sistemaAtual?.falha_inicio ?? null;
+        const duracaoFalhaSegundos = falhaInicio ? Math.floor((Date.now() - falhaInicio) / 1000) : 0;
+
+        const estatRes = await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`);
+        const estatAtual = await estatRes.json();
+
+        await fetch(`${FIREBASE_BASE_URL}/estatisticas.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tempo_total_sem_rede: (estatAtual?.tempo_total_sem_rede ?? 0) + duracaoFalhaSegundos
+          })
+        });
+
+        await fetch(`${FIREBASE_BASE_URL}/sistema.json`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            modo: "rede",
+            estado: "REDE_NORMAL",
+            alarme: false,
+            fonte_ativa: "REDE",
+            rede_status: true,
+            gerador_status: false,
+            tensao: 220,
+            falha_inicio: null,
+            rede: {
+              status: true,
+              tensao: 220,
+              fases_ativas: 3,
+              sequencia_fase_ok: true
+            },
+            gerador: {
+              status: false,
+              tensao: 0,
+              fases_ativas: 0,
+              sequencia_fase_ok: false
+            }
+          })
+        });
+
+        await registrarEvento("retorno_rede", "rede");
+        recarregarAgora();
+      } catch (e) {
+        setText("erroAcao", "Erro ao simular retorno: " + (e?.message || e));
+      } finally {
+        setBotoesAcao(false);
+      }
+    }
+
+    function setBotoesAcao(disabled) {
+      ["btnQueda", "btnRetorno", "btnAtualizar", "btnAtualizarSim"].forEach((id) => {
+        const botao = document.getElementById(id);
+        if (botao) botao.disabled = disabled;
+      });
+    }
+
+    async function registrarEvento(tipo, modo) {
+      const evento = {
+        tipo,
+        modo,
+        timestamp: new Date().toLocaleString("pt-BR")
+      };
+
+      await fetch(`${FIREBASE_BASE_URL}/eventos.json`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(evento)
+      });
+    }
+
+    function recarregarAgora() {
+      buscarDados();
+    }
+
+    buscarDados();
+    setInterval(buscarDados, 2000);
+  </script>
+</body>
+</html>
+
+
+

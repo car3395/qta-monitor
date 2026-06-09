@@ -1,0 +1,51 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(html|js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store"
+          }
+        ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/mobile",
+        "destination": "/mobile.html"
+      },
+      {
+        "source": "/desktop",
+        "destination": "/desktop.html"
+      },
+      {
+        "source": "/supervisorio",
+        "destination": "/supervisorio.html"
+      },
+      {
+        "source": "/simulador",
+        "destination": "/simulador.html"
+      },
+      {
+        "source": "/compra",
+        "destination": "/compra.html"
+      },
+      {
+        "source": "/clientes",
+        "destination": "/clientes.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+.pio/
+.vscode/
+.firebase/
+
+node_modules/
+dist/
+build/
+
+.env
+.env.*
+
+*.log
+*.tmp
+*.bak
+Thumbs.db
+desktop.ini

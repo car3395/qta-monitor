@@ -1,0 +1,4 @@
+[build]
+  publish = "qta-mobile-publicar/public"
+  command = ""
+
