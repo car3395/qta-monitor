@@ -1375,7 +1375,6 @@
     const googleProvider = new firebase.auth.GoogleAuthProvider();
     const FIREBASE_BASE_URL = "https://qta-monitor-default-rtdb.firebaseio.com";
     const historicoTensaoRede = [];
-    const historicoTensaoGerador = [];
     const maxPontos = 24;
     let ultimoPacote = null;
     let intervaloLeitura = null;
@@ -1445,7 +1444,11 @@
         });
         if (!resposta.ok) return false;
         const cliente = await resposta.json();
-        return Boolean(cliente && cliente.ativo === true);
+        if (cliente && cliente.ativo === true) {
+          dadosClienteCodigo = cliente;
+          return true;
+        }
+        return false;
       } catch {
         return false;
       }
@@ -1622,7 +1625,7 @@
       document.getElementById("telaAtual").textContent = nome;
       if (ultimoPacote) {
         const sistema = normalizarSistema(ultimoPacote.sistema);
-        atualizarGrafico(sistema.rede_tensao, sistema.gerador_tensao, false, sistema);
+        atualizarGrafico(sistema.rede_tensao, false, sistema);
       }
     }
 
@@ -1685,17 +1688,18 @@
       const rede = typeof s.rede === "object" && s.rede !== null ? s.rede : {};
       const gerador = typeof s.gerador === "object" && s.gerador !== null ? s.gerador : {};
       const redeTensao = Number(primeiroValor(rede, ["tensao", "voltagem"]) ?? primeiroValor(s, ["rede_tensao", "tensao_rede", "tensao"]) ?? 0);
-      const geradorTensao = Number(primeiroValor(gerador, ["tensao", "voltagem"]) ?? primeiroValor(s, ["gerador_tensao", "tensao_gerador"]) ?? 0);
-      const tensaoNominal = normalizarTensaoNominal(primeiroValor(s, ["tensao_nominal", "tensaoNominal"]) ?? primeiroValor(s.configuracao, ["tensao_nominal", "tensaoNominal"]), redeTensao, geradorTensao);
-      const limiteFalhaBaixa = Number(primeiroValor(s, ["limite_falha_baixa", "limiteFalhaBaixa"]) ?? Math.round(tensaoNominal * 0.80));
-      const limiteFalhaAlta = Number(primeiroValor(s, ["limite_falha_alta", "limiteFalhaAlta"]) ?? Math.round(tensaoNominal * 1.15));
+      const tensaoCliente = obterTensaoNominalCliente();
+      const usarTensaoCliente = tensaoCliente !== null;
+      const tensaoNominal = normalizarTensaoNominal(tensaoCliente ?? primeiroValor(s, ["tensao_nominal", "tensaoNominal"]) ?? primeiroValor(s.configuracao, ["tensao_nominal", "tensaoNominal"]), redeTensao);
+      const limiteFalhaBaixa = usarTensaoCliente ? Math.round(tensaoNominal * 0.80) : Number(primeiroValor(s, ["limite_falha_baixa", "limiteFalhaBaixa"]) ?? Math.round(tensaoNominal * 0.80));
+      const limiteFalhaAlta = usarTensaoCliente ? Math.round(tensaoNominal * 1.15) : Number(primeiroValor(s, ["limite_falha_alta", "limiteFalhaAlta"]) ?? Math.round(tensaoNominal * 1.15));
       let motivoFalha = String(primeiroValor(s, ["motivo_falha_rede", "motivoFalhaRede", "motivo_falha", "motivoFalha"]) ?? "normal").trim().toLowerCase();
       if (motivoFalha === "normal" && redeTensao < limiteFalhaBaixa) motivoFalha = "subtensao";
       if (motivoFalha === "normal" && redeTensao > limiteFalhaAlta) motivoFalha = "sobretensao";
       const redeStatus = booleano(primeiroValor(rede, ["status", "ativa", "ativo"]) ?? primeiroValor(s, ["rede_status", "rede"]));
       const geradorStatus = booleano(primeiroValor(gerador, ["status", "ativa", "ativo"]) ?? primeiroValor(s, ["gerador_status", "gerador"]));
       let fonteAtiva = String(primeiroValor(s, ["fonte_ativa", "fonteAtiva"]) ?? (geradorStatus ? "GERADOR" : "REDE")).toUpperCase();
-      if (!redeStatus && (geradorStatus || geradorTensao > 0)) fonteAtiva = "GERADOR";
+      if (!redeStatus && geradorStatus) fonteAtiva = "GERADOR";
       if (redeStatus && !geradorStatus) fonteAtiva = "REDE";
       const modoInformado = String(primeiroValor(s, ["modo"]) ?? (fonteAtiva === "GERADOR" ? "gerador" : "rede")).toLowerCase();
       const modo = fonteAtiva === "GERADOR" ? "gerador" : modoInformado;
@@ -1704,19 +1708,15 @@
         rede_status: redeStatus,
         gerador_status: geradorStatus,
         alarme: booleano(primeiroValor(s, ["alarme", "alerta"])),
-        tensao: fonteAtiva === "GERADOR" ? geradorTensao : redeTensao,
+        tensao: redeTensao,
         tensao_nominal: tensaoNominal,
         motivo_falha_rede: motivoFalha,
         limite_falha_baixa: limiteFalhaBaixa,
         limite_falha_alta: limiteFalhaAlta,
-        limite_retorno_baixa: Number(primeiroValor(s, ["limite_retorno_baixa", "limiteRetornoBaixa"]) ?? Math.round(tensaoNominal * 0.90)),
-        limite_retorno_alta: Number(primeiroValor(s, ["limite_retorno_alta", "limiteRetornoAlta"]) ?? Math.round(tensaoNominal * 1.10)),
+        limite_retorno_baixa: usarTensaoCliente ? Math.round(tensaoNominal * 0.90) : Number(primeiroValor(s, ["limite_retorno_baixa", "limiteRetornoBaixa"]) ?? Math.round(tensaoNominal * 0.90)),
+        limite_retorno_alta: usarTensaoCliente ? Math.round(tensaoNominal * 1.10) : Number(primeiroValor(s, ["limite_retorno_alta", "limiteRetornoAlta"]) ?? Math.round(tensaoNominal * 1.10)),
         rede_tensao: redeTensao,
-        gerador_tensao: geradorTensao,
-        rede_fases: Number(primeiroValor(rede, ["fases_ativas", "fasesAtivas", "fases"]) ?? 0),
-        gerador_fases: Number(primeiroValor(gerador, ["fases_ativas", "fasesAtivas", "fases"]) ?? 0),
-        rede_sequencia_ok: booleano(primeiroValor(rede, ["sequencia_fase_ok", "sequenciaFaseOk", "sequencia_ok"])),
-        gerador_sequencia_ok: booleano(primeiroValor(gerador, ["sequencia_fase_ok", "sequenciaFaseOk", "sequencia_ok"])),
+        gerador_tensao: 0,
         fonte_ativa: fonteAtiva,
         estado: String(primeiroValor(s, ["estado", "state", "status_geral"]) ?? "--").trim().toUpperCase(),
         modo,
@@ -1724,12 +1724,23 @@
       };
     }
 
-    function normalizarTensaoNominal(valor, redeTensao = 0, geradorTensao = 0) {
+    function obterTensaoNominalCliente() {
+      const valor = dadosClienteCodigo?.tensao_nominal ?? dadosClienteCodigo?.tensaoNominal ?? dadosClienteCodigo?.tensao;
       const numero = Number(valor);
-      if (numero >= 100 && numero <= 140) return 110;
+      if (numero > 0) return numero;
+      if (codigoClienteAtual === "3395") return 127;
+      return null;
+    }
+
+    function normalizarTensaoNominal(valor, redeTensao = 0) {
+      const numero = Number(valor);
+      if (numero >= 100 && numero < 120) return 110;
+      if (numero >= 120 && numero <= 140) return 127;
       if (numero >= 200 && numero <= 250) return 220;
-      const referencia = Math.max(Number(redeTensao) || 0, Number(geradorTensao) || 0);
-      return referencia > 150 ? 220 : 110;
+      const referencia = Number(redeTensao) || 0;
+      if (referencia > 150) return 220;
+      if (referencia >= 120) return 127;
+      return 110;
     }
 
     function tensaoDentroDaFaixa(tensao, sistema, tipo = "retorno") {
@@ -1792,7 +1803,7 @@
       setText("modo", geradorLigado ? "GERADOR" : (redeOperacional ? modo.toUpperCase() : "FALHA"));
       setText("tensao", `Rede ${sistema.rede_tensao} V`);
       setText("redeStatus", redeOperacional ? "ATIVA" : "FALHA");
-      setText("geradorStatus", sistema.gerador_tensao > 0 ? `${sistema.gerador_tensao} V` : (geradorLigado ? "LIGADO" : (!redeOperacional ? "AGUARDANDO" : "DESLIGADO")));
+      setText("geradorStatus", geradorLigado ? "LIGADO" : (!redeOperacional ? "AGUARDANDO" : "DESLIGADO"));
       setText("alarmeStatus", alarmeAtivo ? "ATIVO" : "NORMAL");
 
       setCardState("cardTensao", redeTensaoOk ? "ok" : "danger");
@@ -1802,8 +1813,8 @@
 
       setTag("tagModo", geradorLigado ? "Reserva alimentando" : (redeOperacional ? "Modo normal" : "Rede fora da faixa"), geradorLigado ? "aviso" : (redeOperacional ? "ok" : "alerta"));
       setTag("tagTensao", redeTensaoOk ? `Nominal ${sistema.tensao_nominal} V | OK` : `Fora da faixa ${textoFaixaTensao(sistema)}`, redeTensaoOk ? "ok" : "alerta");
-      setTag("tagRede", redeOperacional ? `${sistema.rede_fases} fases | Sequencia ${sistema.rede_sequencia_ok ? "OK" : "falha"}` : `Falha por ${explicarMotivoFalha(sistema.motivo_falha_rede)}`, redeOperacional ? "ok" : "alerta");
-      setTag("tagGerador", geradorLigado ? `Ligado | ${sistema.gerador_fases} fases` : (sistema.gerador_tensao > 0 ? `Disponivel | ${sistema.gerador_fases} fases` : (!redeOperacional ? "Aguardando transferência" : "Gerador em espera")), geradorLigado || !redeOperacional ? "aviso" : "ok");
+      setTag("tagRede", redeOperacional ? "Rede dentro da faixa" : `Falha por ${explicarMotivoFalha(sistema.motivo_falha_rede)}`, redeOperacional ? "ok" : "alerta");
+      setTag("tagGerador", geradorLigado ? "Reserva alimentando" : (!redeOperacional ? "Aguardando transferencia" : "Gerador em espera"), geradorLigado || !redeOperacional ? "aviso" : "ok");
       setTag("tagAlarme", alarmeAtivo ? "Falha detectada" : "Sistema estável", alarmeAtivo ? "alerta" : "ok");
 
       atualizarLamps(redeOperacional, geradorLigado, alarmeAtivo);
@@ -1815,12 +1826,12 @@
       atualizarAlarmes(redeOperacional, geradorLigado, alarmeAtivo, tensao, sistema);
       atualizarDiagnostico(sistema, estatisticas, eventos);
       atualizarTabelaEventos(eventos);
-      atualizarGrafico(sistema.rede_tensao, sistema.gerador_tensao, true, sistema);
+      atualizarGrafico(sistema.rede_tensao, true, sistema);
     }
 
     function obterEstadoCliente(sistema) {
       const redeOk = sistema.rede_status && tensaoDentroDaFaixa(sistema.rede_tensao, sistema, "retorno");
-      const reservaOk = sistema.gerador_status && tensaoDentroDaFaixa(sistema.gerador_tensao, sistema, "retorno");
+      const reservaOk = sistema.gerador_status;
 
       if (redeOk && !sistema.gerador_status && !sistema.alarme) {
         return {
@@ -1856,7 +1867,7 @@
           classe: "bad",
           titulo: "Alarme ativo",
           etiqueta: "Verificar",
-          texto: "Existe alarme ativo no sistema. Confira rede, reserva, tensão e fases antes de considerar a operação normal."
+          texto: "Existe alarme ativo no sistema. Confira rede, reserva e tensão antes de considerar a operação normal."
         };
       }
 
@@ -1988,10 +1999,6 @@
       return valor ? "Disponivel / normal" : "Indisponivel / em falha";
     }
 
-    function textoSequencia(valor) {
-      return valor ? "Sequencia correta" : "Falha ou nao confirmada";
-    }
-
     function explicarEstadoCliente(estado) {
       const mapa = {
         REDE_NORMAL: "Rede da concessionaria normal",
@@ -2018,14 +2025,11 @@
         "Rede da concessionaria",
         `Situacao: ${textoStatusDisponivel(sistema?.rede_status)}`,
         `Tensao recebida: ${sistema?.rede_tensao ?? "--"} V`,
-        `Fases ativas: ${sistema?.rede_fases ?? "--"}`,
-        `Sequencia de fase: ${textoSequencia(sistema?.rede_sequencia_ok)}`,
         "",
         "Rede reserva / gerador",
         `Situacao: ${sistema?.gerador_status ? "Em operacao" : "Em espera"}`,
-        `Tensao recebida: ${sistema?.gerador_tensao ?? "--"} V`,
-        `Fases ativas: ${sistema?.gerador_fases ?? "--"}`,
-        `Sequencia de fase: ${textoSequencia(sistema?.gerador_sequencia_ok)}`,
+        "Tensao: nao monitorada neste projeto",
+        "Confirmacao usada: status enviado pela placa",
         "",
         "Historico",
         `Quedas registradas: ${estatisticas?.quedas_energia ?? 0}`,
@@ -2039,7 +2043,7 @@
       setText("rawGeradorStatus", sistema?.gerador_status ? "Em operacao / alimentando a carga" : "Em espera");
       setText("rawAlarme", sistema?.alarme ? "Alarme ativo" : "Sem alarme");
       setText("rawModo", sistema?.fonte_ativa === "GERADOR" ? "Reserva / gerador" : "Rede concessionaria");
-      setText("rawTensao", `Nominal: ${sistema?.tensao_nominal ?? "--"} V | Fonte: ${sistema?.fonte_ativa ?? "--"} | Rede: ${sistema?.rede_tensao ?? "--"} V | Reserva: ${sistema?.gerador_tensao ?? "--"} V | Motivo: ${explicarMotivoFalha(sistema?.motivo_falha_rede)}`);
+      setText("rawTensao", `Nominal: ${sistema?.tensao_nominal ?? "--"} V | Fonte: ${sistema?.fonte_ativa ?? "--"} | Rede medida: ${sistema?.rede_tensao ?? "--"} V | Reserva: sem medicao de tensao | Motivo: ${explicarMotivoFalha(sistema?.motivo_falha_rede)}`);
       setText("rawFalhaInicio", sistema?.falha_inicio ? new Date(sistema.falha_inicio).toLocaleString("pt-BR") : "Sem falha em andamento");
       setText("dadosBrutos", montarResumoCliente(sistema, estatisticas, eventos));
     }
@@ -2106,12 +2110,10 @@
       return `${segundos} s`;
     }
 
-    function atualizarGrafico(tensaoRede, tensaoGerador, adicionarPonto, sistema = null) {
+    function atualizarGrafico(tensaoRede, adicionarPonto, sistema = null) {
       if (adicionarPonto) {
         historicoTensaoRede.push(Number(tensaoRede) || 0);
-        historicoTensaoGerador.push(Number(tensaoGerador) || 0);
         if (historicoTensaoRede.length > maxPontos) historicoTensaoRede.shift();
-        if (historicoTensaoGerador.length > maxPontos) historicoTensaoGerador.shift();
       }
 
       const canvas = document.getElementById("graficoTensao");
@@ -2150,12 +2152,9 @@
 
       ctx.font = "13px Arial";
       ctx.fillStyle = "#40d5e8";
-      ctx.fillText("Rede concessionaria", 72, 18);
-      ctx.fillStyle = "#ffc84a";
-      ctx.fillText("Gerador/reserva", 240, 18);
+      ctx.fillText("Rede concessionaria medida pelo PZEM", 72, 18);
 
       desenharLinhaGrafico(ctx, historicoTensaoRede, "#40d5e8", w, h, escalaMax);
-      desenharLinhaGrafico(ctx, historicoTensaoGerador, "#ffc84a", w, h, escalaMax);
     }
 
     function desenharLinhaGrafico(ctx, historico, cor, w, h, escalaMax = 240) {

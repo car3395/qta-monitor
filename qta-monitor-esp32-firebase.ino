@@ -41,10 +41,6 @@ String fonteAtiva = "REDE";
 
 int redeTensao = TENSAO_NOMINAL;
 int geradorTensao = 0;
-int redeFases = 3;
-int geradorFases = 0;
-bool redeSequenciaOk = true;
-bool geradorSequenciaOk = false;
 String motivoFalhaRede = "normal";
 
 int quedasEnergia = 0;
@@ -241,24 +237,16 @@ void atualizarEstadoDerivado() {
     modo = "rede";
     estado = "REDE_NORMAL";
     fonteAtiva = "REDE";
-    redeFases = 3;
-    redeSequenciaOk = true;
     geradorStatus = false;
     geradorTensao = 0;
-    geradorFases = 0;
-    geradorSequenciaOk = false;
     alarme = false;
     motivoFalhaRede = "normal";
   } else {
     modo = "gerador";
     estado = motivoFalhaRede == "sobretensao" ? "REDE_SOBRETENSAO_RESERVA_ATIVA" : "REDE_FALHA_RESERVA_ATIVA";
     fonteAtiva = "GERADOR";
-    redeFases = 0;
-    redeSequenciaOk = false;
     geradorStatus = true;
     if (geradorTensao <= 0) geradorTensao = TENSAO_NOMINAL;
-    geradorFases = 3;
-    geradorSequenciaOk = true;
     alarme = true;
   }
 }
@@ -290,16 +278,12 @@ void enviarStatusSistema() {
 
   json += "\"rede\":{";
   json += "\"status\":" + jsonBool(redeStatus) + ",";
-  json += "\"tensao\":" + String(redeTensao) + ",";
-  json += "\"fases_ativas\":" + String(redeFases) + ",";
-  json += "\"sequencia_fase_ok\":" + jsonBool(redeSequenciaOk);
+  json += "\"tensao\":" + String(redeTensao);
   json += "},";
 
   json += "\"gerador\":{";
   json += "\"status\":" + jsonBool(geradorStatus) + ",";
-  json += "\"tensao\":" + String(geradorTensao) + ",";
-  json += "\"fases_ativas\":" + String(geradorFases) + ",";
-  json += "\"sequencia_fase_ok\":" + jsonBool(geradorSequenciaOk);
+  json += "\"tensao\":" + String(geradorTensao);
   json += "}";
 
   json += "}";
