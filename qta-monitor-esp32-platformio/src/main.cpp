@@ -1,6 +1,12 @@
+#if defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClientSecureBearSSL.h>
+#else
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <WiFiClientSecure.h>
+#endif
 #include <time.h>
 
 const char* WIFI_SSID = "SEU_WIFI";
@@ -8,8 +14,9 @@ const char* WIFI_PASS = "SUA_SENHA";
 
 const char* FIREBASE_HOST = "https://qta-monitor-default-rtdb.firebaseio.com";
 
-const bool MODO_SIMULACAO = true;
-const int TENSAO_NOMINAL = 220;
+const bool MODO_SIMULACAO = false;
+const bool LOG_LEITURA_TENSAO = true;
+const int TENSAO_NOMINAL = 127;
 
 const float FATOR_FALHA_BAIXA = 0.80;
 const float FATOR_FALHA_ALTA = 1.15;
@@ -19,13 +26,23 @@ const float FATOR_RETORNO_ALTA = 1.10;
 const unsigned long TEMPO_CONFIRMAR_FALHA = 3000;
 const unsigned long TEMPO_CONFIRMAR_RETORNO = 5000;
 
+#if defined(ESP8266)
+const int PINO_RELE = D1;
+const int PINO_LED_REDE = D2;
+const int PINO_LED_GERADOR = D7;
+const int PINO_BUZZER = D0;
+const int PINO_SENSOR_TENSAO_REDE = A0;
+const int PINO_PZEM_RX = D5;
+const int PINO_PZEM_TX = D6;
+const int ADC_MAXIMO = 1023;
+#else
 const int PINO_RELE = 23;
 const int PINO_LED_REDE = 18;
 const int PINO_LED_GERADOR = 19;
 const int PINO_BUZZER = 21;
-
 const int PINO_SENSOR_TENSAO_REDE = 34;
-const int PINO_SENSOR_TENSAO_GERADOR = 35;
+const int ADC_MAXIMO = 4095;
+#endif
 
 bool redeStatus = true;
 bool redeAnterior = true;
@@ -130,7 +147,11 @@ String jsonBool(bool valor) {
 }
 
 bool firebaseRequest(const String& metodo, const String& path, const String& json) {
+#if defined(ESP8266)
+  BearSSL::WiFiClientSecure client;
+#else
   WiFiClientSecure client;
+#endif
   client.setInsecure();
 
   HTTPClient https;
@@ -231,17 +252,22 @@ String motivoFalhaPorTensao(int tensao) {
 
 int converterLeituraAnalogicaParaTensao(int leituraAdc) {
   // Ajuste este mapeamento depois conforme o monitor/sensor de tensao usado na bancada.
-  return map(leituraAdc, 0, 4095, 0, (long)(TENSAO_NOMINAL * 1.30));
+  return map(leituraAdc, 0, ADC_MAXIMO, 0, (long)(TENSAO_NOMINAL * 1.30));
 }
 
 int lerTensaoRede() {
   int leitura = analogRead(PINO_SENSOR_TENSAO_REDE);
-  return converterLeituraAnalogicaParaTensao(leitura);
-}
+  int tensaoCalculada = converterLeituraAnalogicaParaTensao(leitura);
 
-int lerTensaoGerador() {
-  int leitura = analogRead(PINO_SENSOR_TENSAO_GERADOR);
-  return converterLeituraAnalogicaParaTensao(leitura);
+  if (LOG_LEITURA_TENSAO) {
+    Serial.print("[LEITURA] ADC=");
+    Serial.print(leitura);
+    Serial.print(" | Rede=");
+    Serial.print(tensaoCalculada);
+    Serial.println(" V");
+  }
+
+  return tensaoCalculada;
 }
 
 void atualizarSaidasFisicas() {
@@ -265,7 +291,7 @@ void atualizarEstadoDerivado() {
     estado = motivoFalhaRede == "sobretensao" ? "REDE_SOBRETENSAO_RESERVA_ATIVA" : "REDE_FALHA_RESERVA_ATIVA";
     fonteAtiva = "GERADOR";
     geradorStatus = true;
-    if (geradorTensao <= 0) geradorTensao = TENSAO_NOMINAL;
+    geradorTensao = 0;
     alarme = true;
   }
 }
@@ -393,11 +419,7 @@ void avaliarRedePorTensaoReal() {
 
   redeTensao = lerTensaoRede();
 
-  if (geradorStatus) {
-    geradorTensao = lerTensaoGerador();
-  } else {
-    geradorTensao = 0;
-  }
+  geradorTensao = 0;
 
   if (redeStatus) {
     if (redeForaDaFaixaDeFalha(redeTensao)) {
@@ -457,7 +479,7 @@ void simularSistema() {
 
     redeStatus = false;
     redeTensao = 0;
-    geradorTensao = TENSAO_NOMINAL;
+    geradorTensao = 0;
     motivoFalhaRede = "subtensao";
     processarMudancasDeEstado();
 
@@ -501,7 +523,6 @@ void setup() {
   pinMode(PINO_LED_GERADOR, OUTPUT);
   pinMode(PINO_BUZZER, OUTPUT);
   pinMode(PINO_SENSOR_TENSAO_REDE, INPUT);
-  pinMode(PINO_SENSOR_TENSAO_GERADOR, INPUT);
 
   redeTensao = TENSAO_NOMINAL;
   atualizarEstadoDerivado();
