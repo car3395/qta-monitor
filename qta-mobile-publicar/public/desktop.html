@@ -6,13 +6,16 @@
   <title>Supervisório QTA - Painel Completo</title>
   <style>
     :root {
-      --bg: #07111f;
-      --panel: #101b2c;
-      --panel-2: #0c1727;
-      --panel-3: #14243a;
-      --line: #273c5c;
-      --text: #edf4ff;
-      --muted: #9eb1cd;
+      --bg: #f5f6f8;
+      --panel: #ffffff;
+      --panel-2: #f9fafb;
+      --panel-3: #eef1f5;
+      --line: #dde3ea;
+      --text: #171b22;
+      --muted: #697586;
+      --brand: #e30613;
+      --brand-dark: #a90009;
+      --graphite: #20242c;
       --blue: #4f8cff;
       --green: #2fd174;
       --red: #ff5c5c;
@@ -29,7 +32,9 @@
 
     body {
       min-height: 100vh;
-      background: var(--bg);
+      background:
+        linear-gradient(180deg, #ffffff 0%, #f5f6f8 42%, #edf0f4 100%),
+        var(--bg);
       color: var(--text);
     }
 
@@ -43,9 +48,8 @@
       place-items: center;
       padding: 24px;
       background:
-        radial-gradient(circle at 18% 18%, rgba(64, 213, 232, 0.13), transparent 34%),
-        radial-gradient(circle at 80% 78%, rgba(47, 209, 116, 0.12), transparent 34%),
-        linear-gradient(180deg, #080d17 0%, #07111f 48%, #061018 100%),
+        linear-gradient(135deg, rgba(227, 6, 19, 0.08), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f6f7f9 58%, #eceff3 100%),
         var(--bg);
     }
 
@@ -57,11 +61,11 @@
       width: min(100%, 440px);
       display: grid;
       gap: 18px;
-      background: linear-gradient(180deg, rgba(20, 29, 45, 0.96), rgba(11, 20, 34, 0.96));
-      border: 1px solid rgba(139, 158, 188, 0.22);
-      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(221, 227, 234, 0.95);
+      border-radius: 24px;
       padding: 28px;
-      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      box-shadow: 0 28px 70px rgba(32, 36, 44, 0.14);
     }
 
     .login-card h1 {
@@ -95,9 +99,9 @@
     .login-form input {
       width: 100%;
       min-height: 58px;
-      border: 1px solid rgba(139, 158, 188, 0.22);
+      border: 1px solid var(--line);
       border-radius: 18px;
-      background: rgba(18, 27, 43, 0.86);
+      background: #fff;
       color: var(--text);
       font-size: 1.08rem;
       padding: 0 18px;
@@ -108,7 +112,7 @@
     }
 
     .login-form input:focus {
-      outline: 2px solid rgba(64, 213, 232, 0.4);
+      outline: 2px solid rgba(227, 6, 19, 0.18);
       outline-offset: 1px;
     }
 
@@ -125,7 +129,7 @@
       border: 1px solid rgba(139, 158, 188, 0.2);
       border-radius: 22px;
       padding: 8px;
-      background: rgba(13, 21, 34, 0.72);
+      background: #f1f3f6;
     }
 
     .auth-tabs button {
@@ -149,9 +153,9 @@
     }
 
     .auth-tabs button.active {
-      color: #f0f6ff;
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 8px 22px rgba(0, 0, 0, 0.24);
+      color: var(--brand);
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(32, 36, 44, 0.1);
     }
 
     .auth-tabs .google-mark {
@@ -183,8 +187,8 @@
       border-radius: 18px;
       border-color: rgba(64, 213, 232, 0.28);
       color: #f6fbff;
-      background: linear-gradient(135deg, rgba(64, 113, 190, 0.86), rgba(20, 100, 77, 0.88));
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      box-shadow: 0 12px 28px rgba(227, 6, 19, 0.22);
       font-size: 1.06rem;
     }
 
@@ -844,6 +848,150 @@
       padding: 14px;
     }
 
+    .brand-lockup {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(32, 36, 44, 0.08);
+      height: 52px;
+      object-fit: contain;
+      padding: 6px;
+      width: 82px;
+    }
+
+    .sidebar {
+      background: #ffffff;
+      border-right-color: var(--line);
+      box-shadow: 12px 0 34px rgba(32, 36, 44, 0.04);
+    }
+
+    .logo {
+      color: var(--graphite);
+    }
+
+    .nav-btn {
+      color: #465260;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.active {
+      background: rgba(227, 6, 19, 0.08);
+      border-color: rgba(227, 6, 19, 0.26);
+      color: var(--brand);
+    }
+
+    .status-pill,
+    .logout-btn {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--graphite);
+    }
+
+    .status-hero,
+    .card,
+    .side-card,
+    .info-item,
+    .lamp-box,
+    .chart-box,
+    .status-row,
+    .step,
+    .source-box,
+    .load-box,
+    .raw-box {
+      box-shadow: 0 16px 38px rgba(32, 36, 44, 0.08);
+    }
+
+    .status-hero {
+      background: linear-gradient(135deg, #fff, #f7f8fa);
+      border-radius: 14px;
+    }
+
+    .status-hero.ok {
+      background: linear-gradient(135deg, rgba(47, 209, 116, 0.14), #fff 58%);
+    }
+
+    .status-hero.warn {
+      background: linear-gradient(135deg, rgba(255, 200, 74, 0.18), #fff 58%);
+    }
+
+    .status-hero.bad {
+      background: linear-gradient(135deg, rgba(227, 6, 19, 0.12), #fff 58%);
+      border-color: rgba(227, 6, 19, 0.36);
+    }
+
+    .card,
+    .side-card,
+    .info-item,
+    .lamp-box,
+    .chart-box,
+    .status-row,
+    .step,
+    .source-box,
+    .load-box,
+    .raw-box {
+      border-radius: 14px;
+    }
+
+    .card.state-ok {
+      background: linear-gradient(180deg, rgba(47, 209, 116, 0.12), #fff 62%);
+    }
+
+    .card.state-warning {
+      background: linear-gradient(180deg, rgba(255, 200, 74, 0.14), #fff 62%);
+    }
+
+    .card.state-danger {
+      background: linear-gradient(180deg, rgba(227, 6, 19, 0.12), #fff 62%);
+      border-color: rgba(227, 6, 19, 0.36);
+    }
+
+    .card.state-neutral {
+      background: linear-gradient(180deg, rgba(105, 117, 134, 0.08), #fff 64%);
+      border-color: var(--line);
+    }
+
+    .card h2,
+    .card h3,
+    .side-card h3 {
+      color: #5c6675;
+    }
+
+    .info-item strong,
+    .small-value {
+      color: var(--graphite);
+    }
+
+    .info-item span,
+    .info-item div {
+      color: var(--muted);
+    }
+
+    .btn {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--graphite);
+    }
+
+    .btn.green {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+
+    canvas,
+    .raw-box {
+      background: #fff;
+      color: var(--graphite);
+    }
+
     @media (max-width: 1250px) {
       .layout {
         grid-template-columns: 1fr;
@@ -901,7 +1049,10 @@
 <body>
   <section class="login-screen" id="loginScreen">
     <div class="login-card">
-      <span class="tag ok">QTA Monitor</span>
+      <div class="brand-lockup">
+        <img class="brand-logo" src="assets/vtz-logo.jpg" alt="VTZ" />
+        <span class="tag ok">QTA Monitor</span>
+      </div>
       <div>
         <h1>Entre para monitorar</h1>
         <p>Acompanhe rede, reserva, alarmes e histórico do sistema em tempo real.</p>
@@ -960,8 +1111,13 @@
 
   <div class="layout">
     <aside class="sidebar">
-      <div class="logo">QTA Monitor</div>
-      <div class="subtitle">Supervisório web para acompanhamento da transferência automática de energia.</div>
+      <div class="brand-lockup">
+        <img class="brand-logo" src="assets/vtz-logo.jpg" alt="VTZ" />
+        <div>
+          <div class="logo">QTA Monitor</div>
+          <div class="subtitle">Monitoramento residencial de energia.</div>
+        </div>
+      </div>
 
       <nav class="nav" aria-label="Telas do supervisório">
         <button class="nav-btn active" data-screen-target="visao-geral">Visão geral</button>
@@ -981,7 +1137,7 @@
 
       <div class="side-card">
         <h3>Resumo operacional</h3>
-        <div class="side-item">Fonte ativa: <strong id="fonteAtivaSide">--</strong></div>
+        <div class="side-item">Sua casa está usando: <strong id="fonteAtivaSide">--</strong></div>
         <div class="side-item">Condição: <strong id="condicaoSide">--</strong></div>
         <div class="side-item">Falha atual: <strong id="falhaAtualSide">0 s</strong></div>
       </div>
@@ -991,7 +1147,7 @@
       <div class="topbar">
         <div>
           <h1>Supervisório QTA</h1>
-          <p>Sistema inteligente de transferência automática de energia</p>
+          <p>Monitoramento residencial de energia</p>
         </div>
         <div class="topbar-actions">
           <div class="status-pill" id="statusConexao">Conectando ao Firebase...</div>
@@ -1752,10 +1908,21 @@
     }
 
     function textoFaixaTensao(sistema, tipo = "retorno") {
+      return `${limiteBaixoTexto(sistema, tipo)} a ${limiteAltoTexto(sistema, tipo)} V`;
+    }
+
+    function textoTransferenciaFalha(sistema) {
+      return `abaixo de ${limiteBaixoTexto(sistema, "falha")} V ou acima de ${limiteAltoTexto(sistema, "falha")} V`;
+    }
+
+    function limiteBaixoTexto(sistema, tipo = "retorno") {
       const nominal = normalizarTensaoNominal(sistema?.tensao_nominal);
-      const baixo = Number(sistema?.[`limite_${tipo}_baixa`]) || Math.round(nominal * (tipo === "falha" ? 0.80 : 0.90));
-      const alto = Number(sistema?.[`limite_${tipo}_alta`]) || Math.round(nominal * (tipo === "falha" ? 1.15 : 1.10));
-      return `${baixo} a ${alto} V`;
+      return Number(sistema?.[`limite_${tipo}_baixa`]) || Math.round(nominal * (tipo === "falha" ? 0.80 : 0.90));
+    }
+
+    function limiteAltoTexto(sistema, tipo = "retorno") {
+      const nominal = normalizarTensaoNominal(sistema?.tensao_nominal);
+      return Number(sistema?.[`limite_${tipo}_alta`]) || Math.round(nominal * (tipo === "falha" ? 1.15 : 1.10));
     }
 
     function explicarMotivoFalha(motivo) {
@@ -1812,7 +1979,7 @@
       setCardState("cardAlarme", alarmeAtivo ? "danger" : "ok");
 
       setTag("tagModo", geradorLigado ? "Reserva alimentando" : (redeOperacional ? "Modo normal" : "Rede fora da faixa"), geradorLigado ? "aviso" : (redeOperacional ? "ok" : "alerta"));
-      setTag("tagTensao", redeTensaoOk ? `Nominal ${sistema.tensao_nominal} V | OK` : `Fora da faixa ${textoFaixaTensao(sistema)}`, redeTensaoOk ? "ok" : "alerta");
+      setTag("tagTensao", redeTensaoOk ? `Nominal ${sistema.tensao_nominal} V | retorno estavel` : `Fora do retorno estavel ${textoFaixaTensao(sistema)}`, redeTensaoOk ? "ok" : "alerta");
       setTag("tagRede", redeOperacional ? "Rede dentro da faixa" : `Falha por ${explicarMotivoFalha(sistema.motivo_falha_rede)}`, redeOperacional ? "ok" : "alerta");
       setTag("tagGerador", geradorLigado ? "Reserva alimentando" : (!redeOperacional ? "Aguardando transferencia" : "Gerador em espera"), geradorLigado || !redeOperacional ? "aviso" : "ok");
       setTag("tagAlarme", alarmeAtivo ? "Falha detectada" : "Sistema estável", alarmeAtivo ? "alerta" : "ok");
@@ -1939,16 +2106,16 @@
 
     function atualizarEnergia(tensao, sistema) {
       setText("ultimaTensaoDetalhe", `${tensao} V`);
-      setText("faixaConfigurada", `Estável: ${textoFaixaTensao(sistema)} | transferência: ${textoFaixaTensao(sistema, "falha")}`);
+      setText("faixaConfigurada", `Retorno estável: ${textoFaixaTensao(sistema)} | transferência por falha: ${textoTransferenciaFalha(sistema)}`);
       const tensaoOk = tensaoDentroDaFaixa(tensao, sistema, "retorno");
       const dentroDaFaixaDeFalha = tensaoDentroDaFaixa(tensao, sistema, "falha");
 
       if (tensaoOk) {
-        setText("qualidadeEnergia", `Rede concessionaria normal para sistema ${sistema.tensao_nominal} V. Faixa estavel: ${textoFaixaTensao(sistema)}.`);
+        setText("qualidadeEnergia", `Rede concessionaria normal para sistema ${sistema.tensao_nominal} V. Retorno estável: ${textoFaixaTensao(sistema)}.`);
       } else if (dentroDaFaixaDeFalha) {
-        setText("qualidadeEnergia", `Rede concessionaria em observacao. Ainda nao atingiu limite de transferencia, mas esta fora da faixa estavel ${textoFaixaTensao(sistema)}.`);
+        setText("qualidadeEnergia", `Rede concessionaria em observacao. Ainda nao atingiu limite de transferencia, mas esta fora do retorno estável ${textoFaixaTensao(sistema)}.`);
       } else {
-        setText("qualidadeEnergia", `Rede concessionaria critica por ${explicarMotivoFalha(sistema.motivo_falha_rede)}. Limites de falha: ${textoFaixaTensao(sistema, "falha")}.`);
+        setText("qualidadeEnergia", `Rede concessionaria critica por ${explicarMotivoFalha(sistema.motivo_falha_rede)}. Transferência por falha: ${textoTransferenciaFalha(sistema)}.`);
       }
 
       if (historicoTensaoRede.length < 2) {
@@ -1987,7 +2154,7 @@
         setText("causaProvavel", motivo === "normal" ? "Queda da rede elétrica ou ausência de tensão na entrada principal." : `Rede fora da faixa por ${motivo}.`);
         setText("recomendacaoOperador", geradorLigado ? "Acompanhar o gerador e aguardar o retorno estável da rede." : "Verificar se o gerador recebeu comando de partida.");
       } else if (!tensaoDentroDaFaixa(tensao, sistema, "retorno")) {
-        setText("causaProvavel", `Tensão fora da faixa estável configurada (${textoFaixaTensao(sistema)}).`);
+        setText("causaProvavel", `Tensão fora do retorno estável configurado (${textoFaixaTensao(sistema)}). Transferência por falha: ${textoTransferenciaFalha(sistema)}.`);
         setText("recomendacaoOperador", "Conferir alimentação de entrada, monitor de tensão e sensores.");
       } else {
         setText("causaProvavel", "Operação dentro da normalidade.");
@@ -2018,8 +2185,8 @@
         `Fonte alimentando agora: ${sistema?.fonte_ativa || "Nao informado"}`,
         `Alarme: ${sistema?.alarme ? "Ativo" : "Sem alarme"}`,
         `Tensao nominal configurada: ${sistema?.tensao_nominal ?? "--"} V`,
-        `Faixa estavel: ${textoFaixaTensao(sistema)}`,
-        `Faixa de transferencia: ${textoFaixaTensao(sistema, "falha")}`,
+        `Retorno estavel: ${textoFaixaTensao(sistema)}`,
+        `Transferencia por falha: ${textoTransferenciaFalha(sistema)}`,
         `Motivo atual da falha: ${explicarMotivoFalha(sistema?.motivo_falha_rede)}`,
         "",
         "Rede da concessionaria",
